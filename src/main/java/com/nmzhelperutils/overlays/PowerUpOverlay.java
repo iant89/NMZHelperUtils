@@ -3,6 +3,8 @@ package com.nmzhelperutils.overlays;
 import com.nmzhelperutils.UltimateNMZConfig;
 import com.nmzhelperutils.UltimateNMZPlugin;
 import net.runelite.api.*;
+import net.runelite.api.Point;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.ui.overlay.*;
@@ -85,8 +87,8 @@ public class PowerUpOverlay extends OverlayPanel {
                     continue;
                 }
 
-                String objectName = "";
-                Color objectColor = null;
+                String objectName;
+                Color objectColor;
 
                 switch(gameObject.getId()) {
                     case OBJECT_POWER_SURGE:
@@ -121,9 +123,16 @@ public class PowerUpOverlay extends OverlayPanel {
                     default:
                         continue;
                 }
+
                 if(gameObject.getSceneMinLocation().equals(tile.getSceneLocation())) {
                     if (player.getLocalLocation().distanceTo(gameObject.getLocalLocation()) <= 1500) {
-                        OverlayUtil.renderTileOverlay(graphics, gameObject, objectName, objectColor);
+                        LocalPoint lp = gameObject.getLocalLocation();
+                        Polygon tilePoly = Perspective.getCanvasTileAreaPoly(client, lp, 1);
+
+                        OverlayUtil.renderPolygon(graphics, tilePoly, objectColor, new BasicStroke(2f));
+
+                        Point textLocation = gameObject.getCanvasTextLocation(graphics, objectName, (int) (gameObject.getCanvasTilePoly().getBounds2D().getHeight() + 140));
+                        OverlayUtil.renderTextLocation(graphics, textLocation, objectName, objectColor);
                     }
                 }
             }
