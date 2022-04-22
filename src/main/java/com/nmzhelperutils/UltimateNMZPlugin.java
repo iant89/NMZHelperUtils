@@ -80,8 +80,6 @@ public class UltimateNMZPlugin extends Plugin {
 	// Has the NMZ Started?
 	private boolean nmzStarted = false;
 
-	// This starts as true since you need to get
-	// above the threshold before sending notifications
 	private boolean absorptionNotificationSend = true;
 
 	@Override
@@ -114,6 +112,7 @@ public class UltimateNMZPlugin extends Plugin {
 		overlayManager.remove(notificationManager);
 		overlayManager.remove(powerUpOverlay);
 
+		// Restore Nightmare Zone Widget Visibility
 		Widget nmzWidget = client.getWidget(WidgetInfo.NIGHTMARE_ZONE);
 		if (nmzWidget != null) {
 			nmzWidget.setHidden(false);

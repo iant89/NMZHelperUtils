@@ -57,9 +57,9 @@ public class VisualNotificationManager extends OverlayPanel {
             }
         }
 
-        long notificationLength = -1;
-        Color notificationColor = null;
-        AlphaSineDriver alphaDriver = null;
+        long notificationLength;
+        Color notificationColor;
+        AlphaSineDriver alphaDriver;
 
         float alphaMin = 0f;
         float alphaMax = 0.75f;
@@ -106,7 +106,7 @@ public class VisualNotificationManager extends OverlayPanel {
                 return;
         }
 
-        if(notificationLength > 0 -1) {
+        if(notificationLength > -1) {
             notificationLength = notificationLength * 1000;
         }
 
@@ -190,10 +190,15 @@ public class VisualNotificationManager extends OverlayPanel {
                     break;
             }
 
+
+
             if(icon != null) {
+                final Composite originalComposite = graphics.getComposite();
                 int iW = (int) (icon.getWidth() * 2.5);
                 int iH = (int) (icon.getHeight() * 2.5);
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f - alpha));
                 graphics.drawImage(icon, (x + (width / 2)) - (iW / 2), (client.getCanvasHeight() / 2) - (iH / 2), iW, iH, null);
+                graphics.setComposite(originalComposite);
             }
 
             x += width;
@@ -248,7 +253,7 @@ public class VisualNotificationManager extends OverlayPanel {
         return priorityList;
     }
 
-    public synchronized boolean hasNotification(VisualNotificationType type) {
+    public synchronized boolean hasNotificationType(VisualNotificationType type) {
         return (getNotificationByType(type) == null ? false : true);
     }
 
