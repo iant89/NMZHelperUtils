@@ -7,12 +7,9 @@ import com.github.iant89.ultimatenmz.notifications.VisualNotificationType;
 import net.runelite.api.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
-import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.QuantityFormatter;
 
@@ -28,27 +25,21 @@ public class UltimateNMZOverlay extends OverlayPanel {
     private final Client client;
     private final UltimateNMZConfig config;
     private final UltimateNMZPlugin plugin;
-    private final SkillIconManager iconManager;
-    private final InfoBoxManager infoBoxManager;
-    private final ItemManager itemManager;
 
     private boolean nmzStarted = false;
     private long nmzStartTimer = -1;
 
     @Inject
-    private UltimateNMZOverlay(Client client, UltimateNMZConfig config, UltimateNMZPlugin plugin, SkillIconManager iconManager, InfoBoxManager infoBoxManager, ItemManager itemManager) {
+    private UltimateNMZOverlay(Client client, UltimateNMZConfig config, UltimateNMZPlugin plugin) {
         super(plugin);
 
         this.plugin = plugin;
         this.client = client;
         this.config = config;
-        this.iconManager = iconManager;
-        this.itemManager = itemManager;
-        this.infoBoxManager = infoBoxManager;
 
         setPosition(OverlayPosition.BOTTOM_LEFT);
         setPriority(OverlayPriority.HIGH);
-        getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "NMZ Helper Utilities Overlay."));
+        getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Ultimate-NMZ Overlay."));
     }
 
     @Override
@@ -77,19 +68,15 @@ public class UltimateNMZOverlay extends OverlayPanel {
 
         Widget nmzWidget = client.getWidget(WidgetInfo.NIGHTMARE_ZONE);
         if(nmzWidget != null) {
-            if (config.moveOverlay()) {
-                nmzWidget.setHidden(true);
-            } else {
-                nmzWidget.setHidden(false);
-            }
+            nmzWidget.setHidden(config.moveOverlay());
         }
 
         panelComponent.getChildren().add(TitleComponent.builder().text("-- Ultimate NMZ --").color(Color.GREEN).build());
 
         final int currentHP = client.getBoostedSkillLevel(Skill.HITPOINTS);
-        Color hpColor = Color.GREEN;
-        Color absorptionColor = Color.GREEN;
-        String str = "";
+        Color hpColor;
+        Color absorptionColor;
+        String str;
 
         boolean aboveHPThreshold = false;
         boolean belowHPThreshold = false;

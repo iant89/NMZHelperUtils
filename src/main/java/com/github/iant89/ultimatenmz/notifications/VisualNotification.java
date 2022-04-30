@@ -4,16 +4,15 @@ import com.github.iant89.ultimatenmz.drivers.ValueDriver;
 
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class VisualNotification {
 
     private final VisualNotificationType type;
 
-    private Color color = new Color(0, 179, 255);
+    private Color color;
     private VisualNotificationEffectType effectType = VisualNotificationEffectType.FADE_IN_OUT;
     private long expireTime = -1;
-    private ValueDriver<Float> opacityDriver;
+    private ValueDriver opacityDriver;
     private boolean expired = false;
     private boolean visible = true;
 

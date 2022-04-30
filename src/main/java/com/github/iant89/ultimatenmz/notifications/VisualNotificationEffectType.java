@@ -7,7 +7,7 @@ public enum VisualNotificationEffectType {
 
     ;
 
-    String name;
+    final String name;
 
     VisualNotificationEffectType(String name) {
         this.name = name;
