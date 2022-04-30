@@ -6,6 +6,7 @@ import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
 import com.github.iant89.ultimatenmz.notifications.VisualNotification;
 import com.github.iant89.ultimatenmz.notifications.VisualNotificationManager;
+import com.github.iant89.ultimatenmz.notifications.VisualNotificationType;
 import net.runelite.api.*;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SkillIconManager;
@@ -88,6 +89,27 @@ public class VisualNotificationOverlay extends OverlayPanel {
             if (opacityDriver == null) {
                 opacityDriver = new ConstantDriver();
                 opacityDriver.setValue(1f);
+            }
+
+            // Check to see if we have any absorption potions in inventory, or we have absorption remaining. before showing absorption notification.
+            final int absorptionValue = client.getVar(Varbits.NMZ_ABSORPTION);
+            if(absorptionValue <= 0) {
+                if (visualNotification.getType() == VisualNotificationType.ABSORPTION_BELOW_THRESHOLD) {
+                    ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+                    if (container != null) {
+                        boolean foundAbsorption = false;
+                        for (Item item : container.getItems()) {
+                            if (item.getId() == ItemID.ABSORPTION_4 || item.getId() == ItemID.ABSORPTION_3 || item.getId() == ItemID.ABSORPTION_2 || item.getId() == ItemID.ABSORPTION_1) {
+                                foundAbsorption = true;
+                                break;
+                            }
+                        }
+
+                        if (!foundAbsorption) {
+                            continue;
+                        }
+                    }
+                }
             }
 
             if(visualNotification.isVisible()) {
