@@ -1,0 +1,171 @@
+package com.github.iant89.ultimatenmz.overlays;
+
+import com.github.iant89.ultimatenmz.UltimateNMZConfig;
+import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
+import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
+import com.github.iant89.ultimatenmz.drivers.ValueDriver;
+import com.github.iant89.ultimatenmz.notifications.VisualNotification;
+import com.github.iant89.ultimatenmz.notifications.VisualNotificationManager;
+import net.runelite.api.*;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.SkillIconManager;
+import net.runelite.client.ui.overlay.*;
+
+import javax.inject.Inject;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+
+import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
+
+public class VisualNotificationOverlay extends OverlayPanel {
+
+    public static final int OBJECT_ZAPPER = ObjectID.ZAPPER_26256;
+    public static final int OBJECT_POWER_SURGE = ObjectID.POWER_SURGE;
+    public static final int OBJECT_RECURRENT_DAMAGE = ObjectID.RECURRENT_DAMAGE;
+    public static final int OBJECT_ULTIMATE_FORCE = ObjectID.ULTIMATE_FORCE;
+
+    private final Client client;
+    private final UltimateNMZConfig config;
+    private final UltimateNMZPlugin plugin;
+    private final VisualNotificationManager notificationManager;
+    private final SkillIconManager skillIconManager;
+    private final ItemManager itemManager;
+
+    @Inject
+    private VisualNotificationOverlay(Client client, UltimateNMZConfig config, UltimateNMZPlugin plugin, VisualNotificationManager notificationManager, SkillIconManager skillIconManager, ItemManager itemManager) {
+        super(plugin);
+
+        this.plugin = plugin;
+        this.client = client;
+        this.config = config;
+        this.notificationManager = notificationManager;
+        this.skillIconManager = skillIconManager;
+        this.itemManager = itemManager;
+
+        setPosition(OverlayPosition.DYNAMIC);
+        setLayer(OverlayLayer.ABOVE_SCENE);
+        setPriority(OverlayPriority.HIGH);
+        getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Utimate-NMZ Notification Overlay."));
+    }
+
+    @Override
+    public Dimension render(Graphics2D graphics) {
+        if(!config.visualAlerts() || !plugin.isInNightmareZone()) {
+            return super.render(graphics);
+        }
+
+        if(!plugin.getUltimateNmzOverlay().hasNightmareZoneStarted()) {
+            return super.render(graphics);
+        }
+
+        // Clean time-based notifications
+        notificationManager.cleanNotifications();
+
+        // Make sure we have notifications to show
+        if(notificationManager.getNotificationCount() == 0) {
+            return super.render(graphics);
+        }
+
+        // Get all active notifications
+        ArrayList<VisualNotification> notificationList = notificationManager.getNotifications();
+
+        // Sort Notifications based on priority
+        Collections.sort(notificationList, (o1, o2) -> {
+            if(o1.getType().getPriority() < o2.getType().getPriority()) {
+                return -1;
+            } else if(o1.getType().getPriority() == o2.getType().getPriority()) {
+                return 0;
+            } else {
+                return 1;
+            }
+        });
+
+        Iterator notificationIterator = notificationList.iterator();
+
+        int x = 0;
+        int width = client.getCanvasWidth() / notificationList.size();
+
+        while(notificationIterator.hasNext()) {
+            VisualNotification visualNotification = (VisualNotification) notificationIterator.next();
+
+            if(visualNotification.isExpired()) {
+                notificationIterator.remove();
+                continue;
+            }
+
+            ValueDriver opacityDriver = visualNotification.getOpacityDriver();
+
+            if (opacityDriver == null) {
+                opacityDriver = new ConstantDriver();
+                opacityDriver.setValue(1f);
+            }
+
+            if(visualNotification.isVisible()) {
+                renderNotificationScreen(graphics, visualNotification.getColor(), opacityDriver, new Rectangle(x, 0, width, client.getCanvasHeight()));
+            }
+
+            BufferedImage icon = null;
+            switch (visualNotification.getType()) {
+                case HP_ABOVE_THRESHOLD:
+                    icon = skillIconManager.getSkillImage(Skill.HITPOINTS);
+                    break;
+
+                case ABSORPTION_BELOW_THRESHOLD:
+                    icon = itemManager.getImage(ItemID.ABSORPTION_4);
+                    break;
+
+                default:
+                    break;
+            }
+
+
+            if(icon != null) {
+                final Composite originalComposite = graphics.getComposite();
+                int iW = (int) (icon.getWidth() * 2.5);
+                int iH = (int) (icon.getHeight() * 2.5);
+
+                float iconOpacity = 1f - (float) opacityDriver.getValue();
+
+                if(opacityDriver instanceof ConstantDriver) {
+                    iconOpacity = (float) opacityDriver.getValue();
+                }
+
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, iconOpacity));
+                graphics.drawImage(icon, (x + (width / 2)) - (iW / 2), (client.getCanvasHeight() / 2) - (iH / 2), iW, iH, null);
+                graphics.setComposite(originalComposite);
+            }
+
+            switch (visualNotification.getEffectType()) {
+                case FADE_IN_OUT:
+                case SOLID:
+                    break;
+
+                case FLASH:
+                    visualNotification.setVisible(!visualNotification.isVisible());
+                    break;
+            }
+
+            x += width;
+        }
+
+        return super.render(graphics);
+    }
+
+    private void renderNotificationScreen(Graphics2D graphics, Color color, ValueDriver driver, Rectangle bounds) {
+        Composite originalComposite = graphics.getComposite();
+        graphics.setColor(color);
+
+        if(driver == null) {
+            return;
+        }
+
+        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) driver.getValue()));
+
+        graphics.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        graphics.setComposite(originalComposite);
+    }
+
+}

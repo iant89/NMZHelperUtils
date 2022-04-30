@@ -1,4 +1,4 @@
-package com.nmzhelperutils;
+package com.github.iant89.ultimatenmz;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;

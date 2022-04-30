@@ -1,9 +1,9 @@
-package com.nmzhelperutils.overlays;
+package com.github.iant89.ultimatenmz.overlays;
 
-import com.nmzhelperutils.UltimateNMZConfig;
-import com.nmzhelperutils.UltimateNMZPlugin;
-import com.nmzhelperutils.notifications.VisualNotificationType;
-import com.nmzhelperutils.utils.NumberUtils;
+import com.github.iant89.ultimatenmz.utils.NumberUtils;
+import com.github.iant89.ultimatenmz.UltimateNMZConfig;
+import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
+import com.github.iant89.ultimatenmz.notifications.VisualNotificationType;
 import net.runelite.api.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -23,10 +23,7 @@ import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
 public class UltimateNMZOverlay extends OverlayPanel {
 
-    public static final int OBJECT_ZAPPER = ObjectID.ZAPPER_26256;
-    public static final int OBJECT_POWER_SURGE = ObjectID.POWER_SURGE;
-    public static final int OBJECT_RECURRENT_DAMAGE = ObjectID.RECURRENT_DAMAGE;
-    public static final int OBJECT_ULTIMATE_FORCE = ObjectID.ULTIMATE_FORCE;
+
 
     private final Client client;
     private final UltimateNMZConfig config;

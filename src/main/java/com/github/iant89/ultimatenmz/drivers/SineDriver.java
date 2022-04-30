@@ -1,6 +1,6 @@
-package com.nmzhelperutils.drivers;
+package com.github.iant89.ultimatenmz.drivers;
 
-public class AlphaSineDriver extends ValueDriver<Float>{
+public class SineDriver extends ValueDriver<Float> {
 
 	private float minimum;
 	private float maximum;
@@ -11,7 +11,7 @@ public class AlphaSineDriver extends ValueDriver<Float>{
 
 	private long nextStepTimer = -1;
 
-	public AlphaSineDriver(float min, float max, long duration) {
+	public SineDriver(float min, float max, long duration) {
 		this.minimum = min;
 		this.maximum = max;
 		this.duration = duration;

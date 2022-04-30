@@ -1,4 +1,4 @@
-package com.nmzhelperutils.notifications;
+package com.github.iant89.ultimatenmz.notifications;
 
 public enum VisualNotificationType {
     HP_BELOW_THRESHOLD("HP_BELOW_THRESHOLD", 7),
