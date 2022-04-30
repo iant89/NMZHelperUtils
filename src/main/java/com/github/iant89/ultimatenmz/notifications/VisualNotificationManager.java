@@ -1,23 +1,15 @@
 package com.github.iant89.ultimatenmz.notifications;
 
 import com.github.iant89.ultimatenmz.UltimateNMZConfig;
-import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
 import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
 import com.github.iant89.ultimatenmz.drivers.SineDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
-import net.runelite.api.*;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.SkillIconManager;
-import net.runelite.client.ui.overlay.*;
+import net.runelite.api.Client;
 
 import javax.inject.Inject;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-
-import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
 public class VisualNotificationManager {
 
@@ -174,22 +166,15 @@ public class VisualNotificationManager {
     }
 
     public synchronized void cleanNotifications() {
-        Iterator notificationIterator = notificationList.iterator();
-        while (notificationIterator.hasNext()) {
-            VisualNotification notification = (VisualNotification) notificationIterator.next();
-
-            if(notification.isExpired()) {
-                notificationIterator.remove();
-            }
-        }
+        notificationList.removeIf(VisualNotification::isExpired);
     }
 
     public ArrayList<VisualNotification> getNotificationsByPriority(int priority) {
         final ArrayList<VisualNotification> priorityList = new ArrayList<>();
 
-        Iterator notificationIterator = notificationList.iterator();
+        Iterator<VisualNotification> notificationIterator = notificationList.iterator();
         while (notificationIterator.hasNext()) {
-            VisualNotification notification = (VisualNotification) notificationIterator.next();
+            VisualNotification notification = notificationIterator.next();
 
             if(notification.isExpired()) {
                 notificationIterator.remove();
@@ -204,7 +189,7 @@ public class VisualNotificationManager {
     }
 
     public synchronized boolean hasNotificationType(VisualNotificationType type) {
-        return (getNotificationByType(type) == null ? false : true);
+        return (getNotificationByType(type) != null);
     }
 
     public synchronized VisualNotification getNotificationByType(VisualNotificationType type) {
@@ -218,9 +203,9 @@ public class VisualNotificationManager {
     }
 
     public void removeNotification(VisualNotificationType type) {
-        Iterator notificationIterator = notificationList.iterator();
+        Iterator<VisualNotification> notificationIterator = notificationList.iterator();
         while (notificationIterator.hasNext()) {
-            VisualNotification notification = (VisualNotification) notificationIterator.next();
+            VisualNotification notification = notificationIterator.next();
 
             if(notification.getType() == type) {
                 notificationIterator.remove();

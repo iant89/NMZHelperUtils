@@ -15,17 +15,12 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
 public class VisualNotificationOverlay extends OverlayPanel {
-
-    public static final int OBJECT_ZAPPER = ObjectID.ZAPPER_26256;
-    public static final int OBJECT_POWER_SURGE = ObjectID.POWER_SURGE;
-    public static final int OBJECT_RECURRENT_DAMAGE = ObjectID.RECURRENT_DAMAGE;
-    public static final int OBJECT_ULTIMATE_FORCE = ObjectID.ULTIMATE_FORCE;
 
     private final Client client;
     private final UltimateNMZConfig config;
@@ -48,7 +43,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_SCENE);
         setPriority(OverlayPriority.HIGH);
-        getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Utimate-NMZ Notification Overlay."));
+        getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Ultimate-NMZ Notification Overlay."));
     }
 
     @Override
@@ -73,15 +68,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
         ArrayList<VisualNotification> notificationList = notificationManager.getNotifications();
 
         // Sort Notifications based on priority
-        Collections.sort(notificationList, (o1, o2) -> {
-            if(o1.getType().getPriority() < o2.getType().getPriority()) {
-                return -1;
-            } else if(o1.getType().getPriority() == o2.getType().getPriority()) {
-                return 0;
-            } else {
-                return 1;
-            }
-        });
+        notificationList.sort(Comparator.comparingInt(o -> o.getType().getPriority()));
 
         Iterator notificationIterator = notificationList.iterator();
 
