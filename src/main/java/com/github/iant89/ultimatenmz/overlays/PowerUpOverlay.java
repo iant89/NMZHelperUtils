@@ -1,14 +1,11 @@
-package com.nmzhelperutils.overlays;
+package com.github.iant89.ultimatenmz.overlays;
 
-import com.nmzhelperutils.UltimateNMZConfig;
-import com.nmzhelperutils.UltimateNMZPlugin;
+import com.github.iant89.ultimatenmz.UltimateNMZConfig;
+import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
 import net.runelite.api.*;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.ui.overlay.*;
-import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 
 import javax.inject.Inject;
 
@@ -38,7 +35,7 @@ public class PowerUpOverlay extends OverlayPanel {
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_SCENE);
         setPriority(OverlayPriority.HIGH);
-        getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Utimate NMZ Overlay."));
+        getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Ultimate NMZ Overlay."));
     }
 
     @Override
@@ -53,7 +50,7 @@ public class PowerUpOverlay extends OverlayPanel {
     }
 
     public void renderTileObjects(Graphics2D graphics) {
-        if(!config.drawPowerUpLocation()) {
+        if(!plugin.isInNightmareZone()) {
             return;
         }
 
@@ -69,7 +66,6 @@ public class PowerUpOverlay extends OverlayPanel {
                 if (tile == null) {
                     continue;
                 }
-
 
                 renderGameObjects(graphics, tile, client.getLocalPlayer());
             }
@@ -92,32 +88,32 @@ public class PowerUpOverlay extends OverlayPanel {
 
                 switch(gameObject.getId()) {
                     case OBJECT_POWER_SURGE:
-                        if(!config.powerSurgeNotification()) {
+                        if(!config.drawPowerSurgeLocation()) {
                             continue;
                         }
                         objectName = "POWER SURGE";
-                        objectColor = new Color(255, 221, 0);
+                        objectColor = config.powerSurgeAlertColor();
                         break;
                     case OBJECT_RECURRENT_DAMAGE:
-                        if(!config.recurrentDamageNotification()) {
+                        if(!config.drawRecurrentDamageLocation()) {
                             continue;
                         }
                         objectName = "RECURRENT DAMAGE";
-                        objectColor = new Color(255, 0, 21);
+                        objectColor = config.recurrentDamageAlertColor();
                         break;
                     case OBJECT_ZAPPER:
-                        if(!config.zapperNotification()) {
+                        if(!config.drawZapperLocation()) {
                             continue;
                         }
                         objectName = "ZAPPER";
-                        objectColor = new Color(161, 0, 255);
+                        objectColor = config.zapperAlertColor();
                         break;
                     case OBJECT_ULTIMATE_FORCE:
-                        if(!config.ultimateForceNotification()) {
+                        if(!config.drawUltimateForceLocation()) {
                             continue;
                         }
                         objectName = "ULTIMATE FORCE";
-                        objectColor = new Color(255, 255, 255);
+                        objectColor = config.ultimateForceAlertColor();
                         break;
 
                     default:

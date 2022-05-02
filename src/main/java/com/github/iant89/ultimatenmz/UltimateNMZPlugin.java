@@ -1,16 +1,17 @@
-package com.nmzhelperutils;
+package com.github.iant89.ultimatenmz;
 
 
 
 
+import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
+import com.github.iant89.ultimatenmz.drivers.SineDriver;
+import com.github.iant89.ultimatenmz.notifications.*;
+import com.github.iant89.ultimatenmz.overlays.PowerUpOverlay;
+import com.github.iant89.ultimatenmz.overlays.UltimateNMZOverlay;
+import com.github.iant89.ultimatenmz.overlays.VisualNotificationOverlay;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
-import com.nmzhelperutils.notifications.VisualNotificationManager;
-import com.nmzhelperutils.notifications.VisualNotificationType;
-import com.nmzhelperutils.overlays.PowerUpOverlay;
-import com.nmzhelperutils.overlays.UltimateNMZOverlay;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -37,13 +38,16 @@ import java.util.Arrays;
 @Slf4j
 @PluginDescriptor(
 	name = "Ultimate NMZ",
-	description = "Q&S NMZ Plugin. (Quick & Simple)",
-	tags = { "nmz", "nightmare", "nightmare zone", "info", "alert", "overlay", "combat", "boosts"}
+	description = "AFK at Nightmare Zone, While watching youtube or playing a game? Say no more!",
+	tags = { "nmz", "afk", "nightmare", "nightmare zone", "info", "alert", "overlay", "combat", "boosts"}
 )
 public class UltimateNMZPlugin extends Plugin {
 
 	private static final int[] NMZ_MAP_REGION = {9033};
+
 	private static final Duration HOUR = Duration.ofHours(1);
+
+	private static final Duration OVERLOAD_DURATION = Duration.ofMinutes(5);
 
 	@Inject
 	private Client client;
@@ -70,6 +74,9 @@ public class UltimateNMZPlugin extends Plugin {
 	private VisualNotificationManager notificationManager;
 
 	@Inject
+	private VisualNotificationOverlay notificationOverlay;
+
+	@Inject
 	private PowerUpOverlay powerUpOverlay;
 
 	@Getter
@@ -84,14 +91,15 @@ public class UltimateNMZPlugin extends Plugin {
 
 	@Override
 	protected void startUp() throws Exception {
-		//notificationManager = new VisualNotificationManager(client, this, config);
-
 		overlayManager.add(powerUpOverlay);
-		overlayManager.add(notificationManager);
+		overlayManager.add(notificationOverlay);
 		overlayManager.add(ultimateNmzOverlay);
 
-		notificationManager.createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-		notificationManager.createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
+		//notificationManager.addNotification(new SolidVisualNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, config.maximumHPAlertColor(), 0.55f, -1));
+		//notificationManager.addNotification(new FlashVisualNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED, config.recurrentDamageAlertColor(), 0.55f, -1));
+		//notificationManager.addNotification(new FadedVisualNotification(VisualNotificationType.ZAPPER_SPAWNED, config.zapperAlertColor(), new SineDriver(0f, 0.55f, 20), -1));
+		//notificationManager.createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
+		//notificationManager.createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
 
 		if(client.getGameState() == GameState.LOGGED_IN) {
 			clientThread.invoke(this::start);
@@ -109,7 +117,7 @@ public class UltimateNMZPlugin extends Plugin {
 	@Override
 	protected void shutDown() throws Exception {
 		overlayManager.remove(ultimateNmzOverlay);
-		overlayManager.remove(notificationManager);
+		overlayManager.remove(notificationOverlay);
 		overlayManager.remove(powerUpOverlay);
 
 		// Restore Nightmare Zone Widget Visibility
@@ -149,9 +157,13 @@ public class UltimateNMZPlugin extends Plugin {
 			return;
 		}
 
-		String msg = Text.removeTags(event.getMessage()); //remove color
+		String msg = Text.removeTags(event.getMessage());
 
-		if(msg.contains("You wake up feeling refreshed")) {
+		if (msg.contains("The effects of overload have worn off, and you feel normal again.")) {
+			if (config.overloadNotification()) {
+				notifier.notify("Your overload has worn off");
+			}
+		} else if(msg.contains("You wake up feeling refreshed")) {
 			ultimateNmzOverlay.nightmareZoneEnded();
 			return;
 		}

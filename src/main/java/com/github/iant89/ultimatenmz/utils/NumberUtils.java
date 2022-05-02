@@ -1,4 +1,4 @@
-package com.nmzhelperutils.utils;
+package com.github.iant89.ultimatenmz.utils;
 
 import java.util.Map;
 import java.util.NavigableMap;

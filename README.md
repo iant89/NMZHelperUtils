@@ -11,37 +11,75 @@ Once downloaded click the Configuration Icon, and find the `Ultimate NMZ` entry.
 
 ![](https://imgur.com/iGqBoTx.png)
 
-Setup is Super Simple!
+I've tried to make the Setup Super Simple! 
+It may seem like a lot, however it is separated to keep it from confusing you. 
 
-![](https://imgur.com/prrK0E3.png)
+![](https://imgur.com/0YKGWJZ.png)
 
 ### General
 | Option               | Description                                       |
 |----------------------|---------------------------------------------------|
 | Visual Notifications | This will Enable/Disable the Visual Notifications |
 
-### Hitpoints
-| Option     | Description                                                 |
-|-----|-------------------------------------------------------------|
-| Minimum HP Notification    | Enable/Disable Notification when desired HP is reached      |
-| Minimum HP Threshold    | The desired Minimum HP                                      |
-| Maximum HP Notification    | Enable/Disable Notification when your HP exceeds this value |
-| Maximum HP Threshold    | The Maximum allowed HP                                      |
+### Minimum Hitpoints
+| Option            | Description                                                 |
+|-------------------|-------------------------------------------------------------|
+| Show Notification | Enable/Disable Notification when HP is below the threshold. |
+| Threshold         | The desired Minimum HP                                      |
+| Show Icon         | Shows Hitpoints Icon on Notification                        |
+| Color             | The Color of the notification                                                            |
+| Effect            | The Rendering Effect for the notification                             |
 
-### Power-Ups
-| Option                        | Description                                                        |
-|-------------------------------|--------------------------------------------------------------------|
-| Show Power-Up Location        | Enable/Disable a visual aid to find the Power-Up                   |
-| Recurrent damage Notification | Alerts you when a Recurrent Damage is spawned.                     |
-| Zapper Notification           | Alerts you when a Zapper is spawned. |
-| Power-Surge Notification      | Alerts you when a Power-Surge is spawned.                                             |
-| Ultimate Force Notification   | Alerts you when a Ultimate Force is spawned.                                                                                           |
+### Maximum Hitpoints
+| Option            | Description                                                 |
+|-------------------|-------------------------------------------------------------|
+| Show Notification | Enable/Disable Notification when HP is above the threshold. |
+| Threshold         | The maximum HP before triggering notification               |
+| Show Icon         | Shows Hitpoints Icon on Notification                        |
+| Color             | The Color of the notification                               |
+| Effect            | The Rendering Effect for the notification                   |
+
+### Recurrent Damage Power-Up
+| Option                        | Description                                        |
+|-------------------------------|----------------------------------------------------|
+| Show Spawn Location           | Enable/Disable drawing tile on the spawn location. |
+| Recurrent Damage Notification | Enable/Disable Notifications for Spawns.           |
+| Color                         | The Color of the notification               |
+| Effect                        | The Rendering Effect for the notification                    |
+
+
+### Zapper Power-Up
+| Option              | Description                                        |
+|---------------------|----------------------------------------------------|
+| Show Spawn Location | Enable/Disable drawing tile on the spawn location. |
+| Zapper Notification | Enable/Disable Notifications for Spawns.           |
+| Color               | The Color of the notification               |
+| Effect              | The Rendering Effect for the notification                    |
+
+### Power Surge Power-Up
+| Option                   | Description                                        |
+|--------------------------|----------------------------------------------------|
+| Show Spawn Location      | Enable/Disable drawing tile on the spawn location. |
+| Power Surge Notification | Enable/Disable Notifications for Spawns.           |
+| Color                    | The Color of the notification               |
+| Effect                   | The Rendering Effect for the notification                    |
+
+### Ultimate Force Power-Up
+| Option                      | Description                                        |
+|-----------------------------|----------------------------------------------------|
+| Show Spawn Location         | Enable/Disable drawing tile on the spawn location. |
+| Ultimate Force Notification | Enable/Disable Notifications for Spawns.           |
+| Color                       | The Color of the notification               |
+| Effect                      | The Rendering Effect for the notification                    |
 
 ### Absorption
-| Option                  | Description                                                                 |
-|-------------------------|-----------------------------------------------------------------------------|
-| Absorption Notification | Enable/Disable Notifications when your Absorption drops below the threshold |
-| Minimum Threshold       | The minimum amount of absorption before triggering a alert.                 |
+| Option                      | Description                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------|
+| Absorption Notification     | Enable/Disable Notifications when your Absorption drops below the threshold |
+| Minimum Threshold           | The minimum amount of absorption before triggering a alert.                 |
+| Show Icon                   | Shows Absorption Potion Icon on Notification.                               |
+| Color                       | The Color of the notification                                               |
+| Effect                      | The Rendering Effect for the notification                                   |
 
 ### Overload
 *NOT IMPLEMENTED YET.*

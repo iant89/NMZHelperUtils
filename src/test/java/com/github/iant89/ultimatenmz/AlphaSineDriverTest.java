@@ -1,8 +1,6 @@
-package com.nmzhelperutils;
+package com.github.iant89.ultimatenmz;
 
-import com.nmzhelperutils.drivers.AlphaSineDriver;
-import net.runelite.client.RuneLite;
-import net.runelite.client.externalplugins.ExternalPluginManager;
+import com.github.iant89.ultimatenmz.drivers.SineDriver;
 
 public class AlphaSineDriverTest {
 
@@ -10,7 +8,7 @@ public class AlphaSineDriverTest {
 
         // 30 = 1906
         // 31 = 1968, 1953
-        AlphaSineDriver alphaDriver = new AlphaSineDriver(0.125f, 0.75f, 20);
+        SineDriver alphaDriver = new SineDriver(0.125f, 0.75f, 20);
 
         System.out.println("Step = " + alphaDriver.getStep());
 

@@ -1,4 +1,4 @@
-package com.nmzhelperutils.notifications;
+package com.github.iant89.ultimatenmz.notifications;
 
 public enum VisualNotificationType {
     HP_BELOW_THRESHOLD("HP_BELOW_THRESHOLD", 7),
@@ -11,8 +11,8 @@ public enum VisualNotificationType {
     ULTIMATE_FORCE_SPAWNED("ULTIMATE_FORCE_SPAWNED",6),
     ;
 
-    String name;
-    int priority;
+    final String name;
+    final int priority;
 
     VisualNotificationType(String name, int priority) {
         this.name = name;

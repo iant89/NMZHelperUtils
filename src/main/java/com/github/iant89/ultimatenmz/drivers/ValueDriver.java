@@ -1,12 +1,12 @@
-package com.nmzhelperutils.drivers;
+package com.github.iant89.ultimatenmz.drivers;
 
 public abstract class ValueDriver<T extends Number> {
 
-    private T value;
+    protected T value;
 
     public abstract void setValue(T value);
 
-    public abstract void calculateValue();
+    protected abstract void calculateValue();
 
     public abstract T getValue();
 }
