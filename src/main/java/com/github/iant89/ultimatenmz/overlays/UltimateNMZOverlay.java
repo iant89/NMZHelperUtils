@@ -54,7 +54,6 @@ public class UltimateNMZOverlay extends OverlayPanel {
             return null;
         }
 
-
         if(!nmzStarted && nmzStartTimer > -1) {
             if(System.currentTimeMillis() > nmzStartTimer) {
                 nmzStarted = true;

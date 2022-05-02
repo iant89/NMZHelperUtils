@@ -5,80 +5,76 @@ import com.github.iant89.ultimatenmz.drivers.ValueDriver;
 
 import java.awt.*;
 
-public class VisualNotification {
+public abstract class VisualNotification {
 
-    private final VisualNotificationType type;
+    private VisualNotificationType notificationType;
+    private Color notificationColor;
+    private long notificationLength = -1;
+    private long notificationExpireTime = -1;
+    private ValueDriver notificationOpacityDriver;
+    private boolean notificationExpired = false;
+    private boolean notificationVisible = true;
 
-    private Color color;
-    private VisualNotificationEffectType effectType = VisualNotificationEffectType.FADE_IN_OUT;
-    private long expireTime = -1;
-    private ValueDriver opacityDriver;
-    private boolean expired = false;
-    private boolean visible = true;
-
-    public VisualNotification(final VisualNotificationType type, final Color color, final ValueDriver opacityDriver, final long length) {
-        this.color = color;
-        this.type = type;
-        this.opacityDriver = opacityDriver;
+    public VisualNotification(final VisualNotificationType type, final Color notificationColor, final ValueDriver notificationOpacityDriver, final long length) {
+        this.notificationType = type;
+        this.notificationColor = notificationColor;
+        this.notificationOpacityDriver = notificationOpacityDriver;
+        this.notificationLength = length;
 
         if(length != -1) {
-            expireTime = System.currentTimeMillis() + length;
+            notificationExpireTime = System.currentTimeMillis() + length;
         }
     }
 
-    public final VisualNotificationType getType() {
-        return type;
+    public VisualNotificationType getType() {
+        return notificationType;
     }
 
-    public void setVisible(boolean visible) {
-        this.visible = visible;
+    public long getLength() {
+        return notificationLength;
     }
 
     public boolean isVisible() {
-        return this.visible;
+        return notificationVisible;
+    }
+
+    public void setVisible(boolean visible) {
+        notificationVisible = visible;
     }
 
     public final Color getColor() {
-        return this.color;
-    }
-
-    public void setEffectType(VisualNotificationEffectType type) {
-        effectType = type;
-    }
-
-    public VisualNotificationEffectType getEffectType() {
-        return effectType;
+        return this.notificationColor;
     }
 
     public ValueDriver getOpacityDriver() {
-        return opacityDriver;
+        return notificationOpacityDriver;
     }
 
     public void extendLength(final long length) {
-        if(expireTime == -1 || isExpired()) {
-            expireTime = System.currentTimeMillis() + length;
+        if(notificationExpireTime == -1 || isExpired()) {
+            notificationExpireTime = System.currentTimeMillis() + length;
         } else {
-            expireTime += length;
+            notificationExpireTime += length;
         }
     }
 
     public void expire() {
-        expired = true;
+        notificationExpired = true;
     }
 
     public boolean isExpired() {
-        if(!expired) {
-            if (expireTime == -1) {
+        if(!notificationExpired) {
+            if (notificationExpireTime == -1) {
                 return false;
             }
 
-            if (System.currentTimeMillis() >= expireTime) {
-                expired = true;
+            if (System.currentTimeMillis() >= notificationExpireTime) {
+                notificationExpired = true;
             }
         }
 
-        return expired;
+        return notificationExpired;
     }
 
-
+    public abstract void renderNotification(Graphics2D graphics, Rectangle bounds);
 }

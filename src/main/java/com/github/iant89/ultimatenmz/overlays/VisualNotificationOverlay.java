@@ -49,6 +49,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
+
         if(!config.visualAlerts() || !plugin.isInNightmareZone()) {
             return super.render(graphics);
         }
@@ -56,6 +57,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
         if(!plugin.getUltimateNmzOverlay().hasNightmareZoneStarted()) {
             return super.render(graphics);
         }
+
 
         // Clean time-based notifications
         notificationManager.cleanNotifications();
@@ -92,8 +94,8 @@ public class VisualNotificationOverlay extends OverlayPanel {
             }
 
             // Check to see if we have any absorption potions in inventory, or we have absorption remaining. before showing absorption notification.
-            final int absorptionValue = client.getVar(Varbits.NMZ_ABSORPTION);
-            if(absorptionValue <= 0) {
+            final int absorptionValue = client.getVarbitValue(Varbits.NMZ_ABSORPTION);
+            if(absorptionValue >= 0) {
                 if (visualNotification.getType() == VisualNotificationType.ABSORPTION_BELOW_THRESHOLD) {
                     ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
                     if (container != null) {
@@ -110,20 +112,32 @@ public class VisualNotificationOverlay extends OverlayPanel {
                         }
                     }
                 }
+            } else {
+                if (visualNotification.getType() == VisualNotificationType.ABSORPTION_BELOW_THRESHOLD) {
+                    continue;
+                }
             }
 
-            if(visualNotification.isVisible()) {
-                renderNotificationScreen(graphics, visualNotification.getColor(), opacityDriver, new Rectangle(x, 0, width, client.getCanvasHeight()));
-            }
+            visualNotification.renderNotification(graphics, new Rectangle(x, 0, width, client.getCanvasHeight()));
 
             BufferedImage icon = null;
             switch (visualNotification.getType()) {
+                case HP_BELOW_THRESHOLD:
+                    if(config.showMinimumHPIcon()) {
+                        icon = skillIconManager.getSkillImage(Skill.HITPOINTS);
+                    }
+                    break;
+
                 case HP_ABOVE_THRESHOLD:
-                    icon = skillIconManager.getSkillImage(Skill.HITPOINTS);
+                    if(config.showMaximumHPIcon()) {
+                        icon = skillIconManager.getSkillImage(Skill.HITPOINTS);
+                    }
                     break;
 
                 case ABSORPTION_BELOW_THRESHOLD:
-                    icon = itemManager.getImage(ItemID.ABSORPTION_4);
+                    if(config.showAbsorptionIcon()) {
+                        icon = itemManager.getImage(ItemID.ABSORPTION_4);
+                    }
                     break;
 
                 default:
@@ -147,34 +161,10 @@ public class VisualNotificationOverlay extends OverlayPanel {
                 graphics.setComposite(originalComposite);
             }
 
-            switch (visualNotification.getEffectType()) {
-                case FADE_IN_OUT:
-                case SOLID:
-                    break;
-
-                case FLASH:
-                    visualNotification.setVisible(!visualNotification.isVisible());
-                    break;
-            }
-
             x += width;
         }
 
         return super.render(graphics);
-    }
-
-    private void renderNotificationScreen(Graphics2D graphics, Color color, ValueDriver driver, Rectangle bounds) {
-        Composite originalComposite = graphics.getComposite();
-        graphics.setColor(color);
-
-        if(driver == null) {
-            return;
-        }
-
-        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) driver.getValue()));
-
-        graphics.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        graphics.setComposite(originalComposite);
     }
 
 }

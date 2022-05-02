@@ -3,14 +3,15 @@ package com.github.iant89.ultimatenmz;
 
 
 
-import com.github.iant89.ultimatenmz.notifications.VisualNotificationManager;
+import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
+import com.github.iant89.ultimatenmz.drivers.SineDriver;
+import com.github.iant89.ultimatenmz.notifications.*;
 import com.github.iant89.ultimatenmz.overlays.PowerUpOverlay;
 import com.github.iant89.ultimatenmz.overlays.UltimateNMZOverlay;
 import com.github.iant89.ultimatenmz.overlays.VisualNotificationOverlay;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
-import com.github.iant89.ultimatenmz.notifications.VisualNotificationType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -94,6 +95,9 @@ public class UltimateNMZPlugin extends Plugin {
 		overlayManager.add(notificationOverlay);
 		overlayManager.add(ultimateNmzOverlay);
 
+		//notificationManager.addNotification(new SolidVisualNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, config.maximumHPAlertColor(), 0.55f, -1));
+		//notificationManager.addNotification(new FlashVisualNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED, config.recurrentDamageAlertColor(), 0.55f, -1));
+		//notificationManager.addNotification(new FadedVisualNotification(VisualNotificationType.ZAPPER_SPAWNED, config.zapperAlertColor(), new SineDriver(0f, 0.55f, 20), -1));
 		//notificationManager.createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
 		//notificationManager.createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
 

@@ -28,25 +28,31 @@ public class VisualNotificationManager {
         this.config = config;
     }
 
+    public void addNotification(VisualNotification notification) {
+        notificationList.add(notification);
+    }
+
     public synchronized void createNotification(VisualNotificationType type) {
         VisualNotification visualNotification = getNotificationByType(type);
-
-        if(visualNotification != null) {
-            if(visualNotification.isExpired()) {
-                removeNotification(type);
-                visualNotification = null;
-            }
-        }
-
         long notificationLength = -1;
         Color notificationColor;
         ValueDriver opacityDriver = null;
+        VisualNotificationEffectType notificationEffect;
+
+        if(visualNotification != null) {
+            if(visualNotification.getLength() == -1) {
+                return;
+            } else {
+                removeNotification(type);
+            }
+        }
 
         switch (type) {
             case HP_BELOW_THRESHOLD:
                 notificationColor = config.minimumHPAlertColor();
                 notificationLength = 4;
-                switch (config.absorptionEffectType()) {
+                notificationEffect = config.minimumHPEffectType();
+                switch (config.minimumHPEffectType()) {
                     case FADE_IN_OUT:
                         opacityDriver = new SineDriver(0.125f, 0.55f, 25);
                         break;
@@ -58,7 +64,8 @@ public class VisualNotificationManager {
                 break;
             case HP_ABOVE_THRESHOLD:
                 notificationColor = config.maximumHPAlertColor();
-                switch (config.absorptionEffectType()) {
+                notificationEffect = config.maximumHPEffectType();
+                switch (config.maximumHPEffectType()) {
                     case FADE_IN_OUT:
                         opacityDriver = new SineDriver(0.125f, 0.55f, 25);
                         break;
@@ -70,6 +77,7 @@ public class VisualNotificationManager {
                 break;
             case ABSORPTION_BELOW_THRESHOLD:
                 notificationColor = config.absorptionAlertColor();
+                notificationEffect = config.absorptionEffectType();
                 switch (config.absorptionEffectType()) {
                     case FADE_IN_OUT:
                         opacityDriver = new SineDriver(0.125f, 0.55f, 25);
@@ -82,6 +90,7 @@ public class VisualNotificationManager {
                 break;
             case ZAPPER_SPAWNED:
                 notificationColor = config.zapperAlertColor();
+                notificationEffect = config.zapperEffectType();
                 switch (config.zapperEffectType()) {
                     case FADE_IN_OUT:
                         opacityDriver = new SineDriver(0f, 0.55f, 20);
@@ -95,6 +104,7 @@ public class VisualNotificationManager {
                 break;
             case POWER_SURGE_SPAWNED:
                 notificationColor = config.powerSurgeAlertColor();
+                notificationEffect = config.powerSurgeEffectType();
                 switch (config.powerSurgeEffectType()) {
                     case FADE_IN_OUT:
                         opacityDriver = new SineDriver(0f, 0.55f, 20);
@@ -108,6 +118,7 @@ public class VisualNotificationManager {
                 break;
             case RECURRENT_DAMAGE_SPAWNED:
                 notificationColor = config.recurrentDamageAlertColor();
+                notificationEffect = config.recurrentDamageEffectType();
                 switch (config.recurrentDamageEffectType()) {
                     case FADE_IN_OUT:
                         opacityDriver = new SineDriver(0f, 0.55f, 20);
@@ -121,6 +132,7 @@ public class VisualNotificationManager {
                 break;
             case ULTIMATE_FORCE_SPAWNED:
                 notificationColor = config.ultimateForceAlertColor();
+                notificationEffect = config.ultimateForceEffectType();
                 switch (config.ultimateForceEffectType()) {
                     case FADE_IN_OUT:
                         opacityDriver = new SineDriver(0f, 0.45f, 20);
@@ -145,13 +157,20 @@ public class VisualNotificationManager {
             opacityDriver = new ConstantDriver(1f);
         }
 
-        if(visualNotification == null) {
-            visualNotification = new VisualNotification(type, notificationColor, opacityDriver, notificationLength);
+        switch (notificationEffect) {
+            case FADE_IN_OUT:
+                visualNotification = new FadedVisualNotification(type, notificationColor, opacityDriver, notificationLength);
+                break;
+            case FLASH:
+                visualNotification = new FlashVisualNotification(type, notificationColor, (float) opacityDriver.getValue(), notificationLength);
+                break;
+            case SOLID:
+                visualNotification = new SolidVisualNotification(type, notificationColor, (float) opacityDriver.getValue(), notificationLength);
+                break;
+        }
+
+        if(visualNotification != null) {
             notificationList.add(visualNotification);
-        } else {
-            if(notificationLength != -1) {
-                visualNotification.extendLength(notificationLength);
-            }
         }
     }
 
