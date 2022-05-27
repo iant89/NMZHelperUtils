@@ -1,6 +1,7 @@
 package com.github.iant89.ultimatenmz;
 
 import com.github.iant89.ultimatenmz.notifications.VisualNotificationEffectType;
+import com.github.iant89.ultimatenmz.notifications.VisualNotificationSpeed;
 import net.runelite.client.config.*;
 
 import java.awt.*;
@@ -81,6 +82,7 @@ public interface UltimateNMZConfig extends Config {
     )
     String overloadSection = "overloads";
 
+    /*
     @ConfigSection(
             name = "Super Magic Potions",
             description = "Options pertaining to Super Magic Potions.",
@@ -96,11 +98,12 @@ public interface UltimateNMZConfig extends Config {
             closedByDefault = false
     )
     String superRangingPotionSection = "superranging";
+     */
 
     @ConfigSection(
             name = "Paint",
             description = "Options pertaining to the Paint.",
-            position = 61,
+            position = 59,
             closedByDefault = false
     )
     String paintSection = "paint";
@@ -179,6 +182,17 @@ public interface UltimateNMZConfig extends Config {
         return VisualNotificationEffectType.FADE_IN_OUT;
     }
 
+    @ConfigItem(
+            keyName = "minimumHPEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = minimumHitpointsSection
+    )
+    default VisualNotificationSpeed minimumHPEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
     /*
      * MAXIMUM HP SECTION
      */
@@ -238,6 +252,17 @@ public interface UltimateNMZConfig extends Config {
         return VisualNotificationEffectType.FADE_IN_OUT;
     }
 
+    @ConfigItem(
+            keyName = "maximumHPEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = maximumHitpointsSection
+    )
+    default VisualNotificationSpeed maximumHPEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
     /*
      * RECURRENT DAMAGE POWER UP SECTION
      */
@@ -284,6 +309,17 @@ public interface UltimateNMZConfig extends Config {
     )
     default VisualNotificationEffectType recurrentDamageEffectType() {
         return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "recurrentDamageEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 4,
+            section = recurrentDamagePowerupSection
+    )
+    default VisualNotificationSpeed recurrentDamageEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
     }
 
     /*
@@ -334,6 +370,17 @@ public interface UltimateNMZConfig extends Config {
         return VisualNotificationEffectType.FADE_IN_OUT;
     }
 
+    @ConfigItem(
+            keyName = "zapperEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 4,
+            section = zapperPowerupSection
+    )
+    default VisualNotificationSpeed zapperEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
     /*
      * POWER SURGE POWER UP SECTION
      */
@@ -380,6 +427,17 @@ public interface UltimateNMZConfig extends Config {
     )
     default VisualNotificationEffectType powerSurgeEffectType() {
         return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "powerSurgeEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 4,
+            section = powerSurgePowerupSection
+    )
+    default VisualNotificationSpeed powerSurgeEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
     }
 
     /*
@@ -430,26 +488,25 @@ public interface UltimateNMZConfig extends Config {
         return VisualNotificationEffectType.FADE_IN_OUT;
     }
 
+    @ConfigItem(
+            keyName = "ultimateForceEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 4,
+            section = ultimateForcePowerupSection
+    )
+    default VisualNotificationSpeed ultimateForceEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
     /*
      * OVERLOAD SECTION
      */
-
-    @ConfigItem(
-            keyName = "overloadNotification",
-            name = "Overload Notification",
-            description = "Toggles notifications when your overload runs out.",
-            position = 0,
-            section = overloadSection
-    )
-    default boolean overloadNotification() {
-        return true;
-    }
-
     @ConfigItem(
             keyName = "overloadRunoutNotification",
-            name = "Overload Warning Notification",
+            name = "Warning Notification",
             description = "Toggles notifications when your overload is about to run out.",
-            position = 1,
+            position = 0,
             section = overloadSection
     )
     default boolean overloadRunoutNotification() {
@@ -462,13 +519,100 @@ public interface UltimateNMZConfig extends Config {
     )
     @ConfigItem(
             keyName = "overloadRunoutTime",
-            name = "Overload Warning Seconds",
+            name = "Warning Seconds",
             description = "The length in seconds before your Overload runs out, to notify you.",
-            position = 2,
+            position = 1,
             section = overloadSection
     )
     default int overloadRunoutTime() {
         return 20;
+    }
+
+    @ConfigItem(
+            keyName = "showOverloadIcon",
+            name = "Show Icon",
+            description = "Toggles if a Overload Potion icon is drawn on the visual notification.",
+            position = 2,
+            section = overloadSection
+    )
+    default boolean showOverloadIcon() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "overloadRunOutColor",
+            name = "Warning Color",
+            description = "The color of the Overload Run-out Warning Notification.",
+            position = 3,
+            section = overloadSection
+    )
+    default Color overloadRunOutColor() {
+        return new Color(93, 91, 91);
+    }
+
+    @ConfigItem(
+            keyName = "overloadRunOutEffectType",
+            name = "Warning Effect",
+            description = "The type of effect for Overload Run-out Warning Notification.",
+            position = 4,
+            section = overloadSection
+    )
+    default VisualNotificationEffectType overloadRunOutEffectType() {
+        return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "overloadRunOutEffectSpeed",
+            name = "Warning Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = overloadSection
+    )
+    default VisualNotificationSpeed overloadRunOutEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
+    @ConfigItem(
+            keyName = "overloadExpiredNotification",
+            name = "Expired Notification",
+            description = "Toggles notifications when your overload is has run out.",
+            position = 6,
+            section = overloadSection
+    )
+    default boolean overloadExpiredNotification() {
+        return true;
+    }
+    @ConfigItem(
+            keyName = "overloadExpiredColor",
+            name = "Expired Color",
+            description = "The color of the Overload Expired Notification.",
+            position = 7,
+            section = overloadSection
+    )
+    default Color overloadExpiredColor() {
+        return new Color(35, 35, 35);
+    }
+
+    @ConfigItem(
+            keyName = "overloadExpiredEffectType",
+            name = "Expired Effect",
+            description = "The type of effect for Overload Expired Notification.",
+            position = 8,
+            section = overloadSection
+    )
+    default VisualNotificationEffectType overloadExpiredEffectType() {
+        return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "overloadExpiredEffectSpeed",
+            name = "Expired Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 9,
+            section = overloadSection
+    )
+    default VisualNotificationSpeed overloadExpiredEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
     }
 
     /*
@@ -529,6 +673,17 @@ public interface UltimateNMZConfig extends Config {
     )
     default VisualNotificationEffectType absorptionEffectType() {
         return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "absorptionEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = absorptionSection
+    )
+    default VisualNotificationSpeed absorptionEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
     }
 
     /*

@@ -15,6 +15,7 @@ import net.runelite.client.util.QuantityFormatter;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.time.Duration;
 
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
@@ -28,6 +29,8 @@ public class UltimateNMZOverlay extends OverlayPanel {
 
     private boolean nmzStarted = false;
     private long nmzStartTimer = -1;
+
+
 
     @Inject
     private UltimateNMZOverlay(Client client, UltimateNMZConfig config, UltimateNMZPlugin plugin) {
@@ -109,7 +112,14 @@ public class UltimateNMZOverlay extends OverlayPanel {
         final int currentPoints = client.getVar(Varbits.NMZ_POINTS);
         final int totalPoints = currentPoints + client.getVar(VarPlayer.NMZ_REWARD_POINTS);
         final int absorptionPoints = client.getVar(Varbits.NMZ_ABSORPTION);
-        panelComponent.getChildren().add(LineComponent.builder().left("Current HP:").right(str).rightColor(hpColor).build());
+
+        String durationString = String.format("%02d:%02d:%02d", plugin.getSessionDuration().toHours(), plugin.getSessionDuration().toMinutesPart(), plugin.getSessionDuration().toSecondsPart());
+        panelComponent.getChildren().add(LineComponent.builder().left("Session:").right("" + durationString).rightColor(Color.GREEN).build());
+        panelComponent.getChildren().add(LineComponent.builder().left("").build());
+
+        panelComponent.getChildren().add(LineComponent.builder().left("Hitpoints:").right(str).rightColor(hpColor).build());
+
+        panelComponent.getChildren().add(LineComponent.builder().left("").build());
 
         if(absorptionPoints == 0) {
             absorptionColor = Color.WHITE;
@@ -122,13 +132,26 @@ public class UltimateNMZOverlay extends OverlayPanel {
             panelComponent.getChildren().add(LineComponent.builder().left("Absorption:").right(QuantityFormatter.formatNumber(absorptionPoints)).rightColor(absorptionColor).build());
         }
 
+        durationString = "";
+        Color overloadColor = Color.GREEN;
+        if(plugin.getOverloadDurationLeft() != null) {
+            Duration overloadDuration = plugin.getOverloadDurationLeft();
+
+            if(overloadDuration.toMinutesPart() > 0 || overloadDuration.toSecondsPart() > 0) {
+                durationString = String.format("%02d:%02d", overloadDuration.toMinutesPart(), overloadDuration.toSecondsPart());
+
+                if(config.overloadRunoutTime() >= overloadDuration.toSeconds()) {
+                    overloadColor = Color.RED;
+                }
+
+                panelComponent.getChildren().add(LineComponent.builder().left("Overload:").right("" + durationString).rightColor(overloadColor).build());
+            }
+        }
+
         panelComponent.getChildren().add(LineComponent.builder().left("").build());
         panelComponent.getChildren().add(LineComponent.builder().left("Points:").right(NumberUtils.format(currentPoints)).build());
         panelComponent.getChildren().add(LineComponent.builder().left("Points/Hour:").right(NumberUtils.format(plugin.getPointsPerHour())).build());
         panelComponent.getChildren().add(LineComponent.builder().left("Total Points:").right(NumberUtils.format(totalPoints)).build());
-
-
-        float notificationAlpha = 0f;
 
         // Visual Notifications
         if(config.visualAlerts()) {

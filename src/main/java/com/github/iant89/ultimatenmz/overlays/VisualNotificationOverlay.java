@@ -3,10 +3,10 @@ package com.github.iant89.ultimatenmz.overlays;
 import com.github.iant89.ultimatenmz.UltimateNMZConfig;
 import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
 import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
+import com.github.iant89.ultimatenmz.drivers.SineDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
-import com.github.iant89.ultimatenmz.notifications.VisualNotification;
-import com.github.iant89.ultimatenmz.notifications.VisualNotificationManager;
-import com.github.iant89.ultimatenmz.notifications.VisualNotificationType;
+import com.github.iant89.ultimatenmz.notifications.*;
+import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import net.runelite.api.*;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SkillIconManager;
@@ -30,6 +30,8 @@ public class VisualNotificationOverlay extends OverlayPanel {
     private final SkillIconManager skillIconManager;
     private final ItemManager itemManager;
 
+    private ValueDriver iconSizeDriver = new SineDriver(2f, 5f, 25);
+
     @Inject
     private VisualNotificationOverlay(Client client, UltimateNMZConfig config, UltimateNMZPlugin plugin, VisualNotificationManager notificationManager, SkillIconManager skillIconManager, ItemManager itemManager) {
         super(plugin);
@@ -45,6 +47,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
         setLayer(OverlayLayer.ABOVE_SCENE);
         setPriority(OverlayPriority.HIGH);
         getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Ultimate-NMZ Notification Overlay."));
+
     }
 
     @Override
@@ -93,31 +96,6 @@ public class VisualNotificationOverlay extends OverlayPanel {
                 opacityDriver.setValue(1f);
             }
 
-            // Check to see if we have any absorption potions in inventory, or we have absorption remaining. before showing absorption notification.
-            final int absorptionValue = client.getVarbitValue(Varbits.NMZ_ABSORPTION);
-            if(absorptionValue >= 0) {
-                if (visualNotification.getType() == VisualNotificationType.ABSORPTION_BELOW_THRESHOLD) {
-                    ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
-                    if (container != null) {
-                        boolean foundAbsorption = false;
-                        for (Item item : container.getItems()) {
-                            if (item.getId() == ItemID.ABSORPTION_4 || item.getId() == ItemID.ABSORPTION_3 || item.getId() == ItemID.ABSORPTION_2 || item.getId() == ItemID.ABSORPTION_1) {
-                                foundAbsorption = true;
-                                break;
-                            }
-                        }
-
-                        if (!foundAbsorption) {
-                            continue;
-                        }
-                    }
-                }
-            } else {
-                if (visualNotification.getType() == VisualNotificationType.ABSORPTION_BELOW_THRESHOLD) {
-                    continue;
-                }
-            }
-
             visualNotification.renderNotification(graphics, new Rectangle(x, 0, width, client.getCanvasHeight()));
 
             BufferedImage icon = null;
@@ -134,6 +112,13 @@ public class VisualNotificationOverlay extends OverlayPanel {
                     }
                     break;
 
+                case OVERLOAD_ALMOST_EXPIRED:
+                case OVERLOAD_EXPIRED:
+                    if(config.showOverloadIcon()) {
+                        icon = itemManager.getImage(ItemID.OVERLOAD_4);
+                    }
+                    break;
+
                 case ABSORPTION_BELOW_THRESHOLD:
                     if(config.showAbsorptionIcon()) {
                         icon = itemManager.getImage(ItemID.ABSORPTION_4);
@@ -147,8 +132,9 @@ public class VisualNotificationOverlay extends OverlayPanel {
 
             if(icon != null) {
                 final Composite originalComposite = graphics.getComposite();
-                int iW = (int) (icon.getWidth() * 2.5);
-                int iH = (int) (icon.getHeight() * 2.5);
+                final double iconSize = iconSizeDriver.getValue().doubleValue();
+                int iW = (int) (icon.getWidth() * iconSize);
+                int iH = (int) (icon.getHeight() * iconSize);
 
                 float iconOpacity = 1f - (float) opacityDriver.getValue();
 
@@ -166,5 +152,4 @@ public class VisualNotificationOverlay extends OverlayPanel {
 
         return super.render(graphics);
     }
-
 }

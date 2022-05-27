@@ -5,6 +5,17 @@ public enum VisualNotificationType {
     HP_ABOVE_THRESHOLD("HP_ABOVE_THRESHOLD",2),
     ABSORPTION_BELOW_THRESHOLD("ABSORPTION_BELOW_THRESHOLD",1),
 
+    /*
+     * Overload Notifications
+     */
+
+    OVERLOAD_ALMOST_EXPIRED("", 1),
+    OVERLOAD_EXPIRED("", 2),
+
+
+    /*
+     * Power-Up Spawn Notifications
+     */
     ZAPPER_SPAWNED("ZAPPER_SPAWNED",3),
     POWER_SURGE_SPAWNED("POWER_SURGE_SPAWNED",4),
     RECURRENT_DAMAGE_SPAWNED("RECURRENT_DAMAGE_SPAWNED",5),
