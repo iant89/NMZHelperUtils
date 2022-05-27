@@ -3,12 +3,12 @@ package com.github.iant89.ultimatenmz;
 
 
 
-import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
-import com.github.iant89.ultimatenmz.drivers.SineDriver;
 import com.github.iant89.ultimatenmz.notifications.*;
+import com.github.iant89.ultimatenmz.overlays.CountdownOverlay;
 import com.github.iant89.ultimatenmz.overlays.PowerUpOverlay;
 import com.github.iant89.ultimatenmz.overlays.UltimateNMZOverlay;
 import com.github.iant89.ultimatenmz.overlays.VisualNotificationOverlay;
+import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
@@ -16,7 +16,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -77,6 +76,9 @@ public class UltimateNMZPlugin extends Plugin {
 	private VisualNotificationOverlay notificationOverlay;
 
 	@Inject
+	private CountdownOverlay countdownOverlay;
+
+	@Inject
 	private PowerUpOverlay powerUpOverlay;
 
 	@Getter
@@ -89,12 +91,24 @@ public class UltimateNMZPlugin extends Plugin {
 
 	private boolean absorptionNotificationSend = true;
 
+	// Overload Variables
+	private boolean overloadNotificationSend = true;
+	private Instant lastOverload;
+
+	private long overloadTimer = -1;
+
+	private Instant sessionStart;
+	private Duration sessionDuration;
+	private Instant sessionEnd;
+
 	@Override
 	protected void startUp() throws Exception {
+		overlayManager.add(countdownOverlay);
 		overlayManager.add(powerUpOverlay);
 		overlayManager.add(notificationOverlay);
 		overlayManager.add(ultimateNmzOverlay);
 
+		// Debug
 		//notificationManager.addNotification(new SolidVisualNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, config.maximumHPAlertColor(), 0.55f, -1));
 		//notificationManager.addNotification(new FlashVisualNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED, config.recurrentDamageAlertColor(), 0.55f, -1));
 		//notificationManager.addNotification(new FadedVisualNotification(VisualNotificationType.ZAPPER_SPAWNED, config.zapperAlertColor(), new SineDriver(0f, 0.55f, 20), -1));
@@ -116,6 +130,7 @@ public class UltimateNMZPlugin extends Plugin {
 
 	@Override
 	protected void shutDown() throws Exception {
+		overlayManager.remove(countdownOverlay);
 		overlayManager.remove(ultimateNmzOverlay);
 		overlayManager.remove(notificationOverlay);
 		overlayManager.remove(powerUpOverlay);
@@ -125,10 +140,6 @@ public class UltimateNMZPlugin extends Plugin {
 		if (nmzWidget != null) {
 			nmzWidget.setHidden(false);
 		}
-	}
-
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged) {
 
 	}
 
@@ -151,80 +162,188 @@ public class UltimateNMZPlugin extends Plugin {
 		return ultimateNmzOverlay;
 	}
 
+
+	public Duration getOverloadDurationLeft() {
+
+		if(overloadTimer == -1) {
+			return null;
+		}
+
+		if(System.currentTimeMillis() >= overloadTimer) {
+			return null;
+		}
+
+		return Duration.ofSeconds((overloadTimer - System.currentTimeMillis()) / 1000);
+
+		/*
+		final Instant now = Instant.now();
+
+		if(now == null || lastOverload == null) {
+			return null;
+		}
+
+		Duration durationLeft = Duration.between(now, lastOverload.plus(OVERLOAD_DURATION));
+
+
+		if(now.isAfter(lastOverload.plus(OVERLOAD_DURATION))) {
+			return null;
+		} else {
+			return durationLeft;
+		}
+		 */
+	}
+
+	public Instant getSessionStart() {
+		return sessionStart;
+	}
+
+	public Instant getSessionEnd() {
+		return sessionEnd;
+	}
+
+	public Duration getSessionDuration() {
+		if(sessionEnd != null) {
+			return Duration.between(sessionStart, sessionEnd);
+		}
+
+		return Duration.between(sessionStart, Instant.now());
+	}
+
 	@Subscribe
 	private void onChatMessage(ChatMessage event) {
-		if (event.getType() != ChatMessageType.GAMEMESSAGE || !isInNightmareZone()) {
-			return;
-		}
-
 		String msg = Text.removeTags(event.getMessage());
 
-		if (msg.contains("The effects of overload have worn off, and you feel normal again.")) {
-			if (config.overloadNotification()) {
+		//log.info("ChatMessage [" + event.getType().name() + ", \"" + msg + "\")");
+
+		if(msg.contains("You drink some of your overload potion.")) {
+
+			// Drinking a Overload Potion
+			log.debug("Player drank a overload potion");
+
+			overloadTimer = System.currentTimeMillis() + ((5 * 60) * 1000);
+
+			final Instant now = Instant.now();
+			lastOverload = now;
+			overloadNotificationSend = true;
+
+			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+			return;
+
+		}
+
+		// Check to see if we are in the NMZ before we process any of the other messages.
+		if(!isInNightmareZone()) {
+			return;
+		}
+
+		if (msg.contains("effects of overload have worn off")) {
+
+			overloadTimer = -1;
+			log.debug("Overload Potion expired.");
+			// Overload Potion worn off
+			if (config.overloadExpiredNotification()) {
+				if(InventoryUtils.hasOneOfItems(client, ItemID.OVERLOAD_4, ItemID.OVERLOAD_3, ItemID.OVERLOAD_2, ItemID.OVERLOAD_1)) {
+					notificationManager.removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+
+					if(config.visualAlerts()) {
+						getNotificationManager().createNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+					}
+				} else {
+					getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+					getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+				}
+
 				notifier.notify("Your overload has worn off");
 			}
+
+			lastOverload = null;
+
 		} else if(msg.contains("You wake up feeling refreshed")) {
-			ultimateNmzOverlay.nightmareZoneEnded();
-			return;
-		}
 
-		if(msg.contains("25 secs to")) {
+			// NMZ has ended...
+			endSession();
+
+		} else if(msg.contains("25 secs to")) {
+
 			// Started NMZ...
-			ultimateNmzOverlay.nightmareZoneStarted();
-			return;
-		}
+			startSession();
 
-		if(msg.contains("You activate the")) {
+		} else if(msg.contains("You activate the")) {
+
+			// Activated Zapper
 			if(msg.contains("zapper")) {
 				getNotificationManager().removeNotification(VisualNotificationType.ZAPPER_SPAWNED);
 			}
-		}
 
-		if(msg.contains("You now have")) {
+		} else if(msg.contains("You now have")) {
+
+			// Activated Recurrent Damage
 			if(msg.contains("recurrent damage")) {
 				getNotificationManager().removeNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED);
 			}
-		}
 
-		if(msg.contains("You feel a surge of special")) {
+		} else if(msg.contains("You feel a surge of special")) {
+
+			// Activated Power-Surge
 			getNotificationManager().removeNotification(VisualNotificationType.POWER_SURGE_SPAWNED);
-		}
 
-		if (msg.contains("A power-up has spawned:")) {
+		} else if (msg.contains("A power-up has spawned:")) {
+
 			if (msg.contains("Power surge")) {
+
+				// Power-Surge Spawned
 				if (config.powerSurgeNotification()) {
 					if(config.visualAlerts()) {
 						getNotificationManager().createNotification(VisualNotificationType.POWER_SURGE_SPAWNED);
 					}
 					notifier.notify(msg);
 				}
+
 			} else if (msg.contains("Recurrent damage")) {
+
+				// Recurrent Damage Spawned
 				if (config.recurrentDamageNotification()) {
 					if(config.visualAlerts()) {
 						getNotificationManager().createNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED);
 					}
 					notifier.notify(msg);
 				}
+
 			} else if (msg.contains("Zapper")) {
+
+				// Zapper Spawned
 				if (config.zapperNotification()) {
 					if(config.visualAlerts()) {
 						getNotificationManager().createNotification(VisualNotificationType.ZAPPER_SPAWNED);
 					}
 					notifier.notify(msg);
 				}
+
 			} else if (msg.contains("Ultimate force")) {
+
+				// Ultimate Force Spawned
 				if (config.ultimateForceNotification()) {
 					if(config.visualAlerts()) {
 						getNotificationManager().createNotification(VisualNotificationType.ULTIMATE_FORCE_SPAWNED);
 					}
 					notifier.notify(msg);
 				}
+
 			}
 		}
 	}
 
 	private void checkAbsorption() {
 		int absorptionPoints = client.getVar(Varbits.NMZ_ABSORPTION);
+
+		if(absorptionPoints < config.absorptionThreshold()) {
+			if(config.absorptionNotification()) {
+				if(InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_1, ItemID.ABSORPTION_2, ItemID.ABSORPTION_3, ItemID.ABSORPTION_4)) {
+					notificationManager.createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
+				}
+			}
+		}
 
 		if (!absorptionNotificationSend) {
 			if (absorptionPoints < config.absorptionThreshold()) {
@@ -234,6 +353,47 @@ public class UltimateNMZPlugin extends Plugin {
 		} else {
 			if (absorptionPoints > config.absorptionThreshold()) {
 				absorptionNotificationSend = false;
+			}
+		}
+	}
+
+	private void checkOverload() {
+		if(overloadTimer == -1) {
+			return;
+		}
+
+		if(System.currentTimeMillis() >= overloadTimer) {
+			overloadNotificationSend = true;
+			overloadTimer = -1;
+
+			if(InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_1, ItemID.ABSORPTION_2, ItemID.ABSORPTION_3, ItemID.ABSORPTION_4)) {
+				if(config.visualAlerts() && config.overloadExpiredNotification()) {
+					if(!notificationManager.hasNotificationType(VisualNotificationType.OVERLOAD_EXPIRED)) {
+						notificationManager.removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+						notificationManager.createNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+						if(overloadNotificationSend) {
+							notifier.notify("Your Overload Potion has now expired.");
+							overloadNotificationSend = false;
+						}
+					}
+				}
+			} else {
+				notificationManager.removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+				notificationManager.removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+			}
+			return;
+		} else if(System.currentTimeMillis() >= (overloadTimer - (config.overloadRunoutTime() * 1000))) {
+
+			if(config.visualAlerts()) {
+				if(config.overloadRunoutNotification()) {
+					if (!notificationManager.hasNotificationType(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED)) {
+						notificationManager.createNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+					}
+					if(overloadNotificationSend) {
+						notifier.notify("Your overload potion is about to expire!");
+						overloadNotificationSend = false;
+					}
+				}
 			}
 		}
 	}
@@ -287,8 +447,32 @@ public class UltimateNMZPlugin extends Plugin {
 			checkAbsorption();
 		}
 
+		checkOverload();
+
 		if (config.moveOverlay()) {
 			pointsPerHour = calculatePointsPerHour();
 		}
+	}
+
+	private void startSession() {
+
+		sessionStart = Instant.now();
+		sessionEnd = null;
+		ultimateNmzOverlay.nightmareZoneStarted();
+		countdownOverlay.triggerCountdown(Instant.now().plus(Duration.ofSeconds(25)));
+
+	}
+	private void endSession() {
+
+		// Grab the Time, to calculate total session length
+		sessionEnd = Instant.now();
+
+		ultimateNmzOverlay.nightmareZoneEnded();
+
+		// Clear Tracking Variables
+		lastOverload = null;
+
+		// Remove all notifications, if they havent already been removed.
+		getNotificationManager().removeAll();
 	}
 }

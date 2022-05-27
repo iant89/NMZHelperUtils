@@ -4,7 +4,9 @@ import com.github.iant89.ultimatenmz.UltimateNMZConfig;
 import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
 import com.github.iant89.ultimatenmz.drivers.SineDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
+import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import net.runelite.api.Client;
+import net.runelite.api.ItemID;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -32,6 +34,10 @@ public class VisualNotificationManager {
         notificationList.add(notification);
     }
 
+    public synchronized void removeAll() {
+        notificationList.clear();
+    }
+
     public synchronized void createNotification(VisualNotificationType type) {
         VisualNotification visualNotification = getNotificationByType(type);
         long notificationLength = -1;
@@ -48,102 +54,82 @@ public class VisualNotificationManager {
         }
 
         switch (type) {
-            case HP_BELOW_THRESHOLD:
-                notificationColor = config.minimumHPAlertColor();
-                notificationLength = 4;
-                notificationEffect = config.minimumHPEffectType();
-                switch (config.minimumHPEffectType()) {
-                    case FADE_IN_OUT:
-                        opacityDriver = new SineDriver(0.125f, 0.55f, 25);
-                        break;
-                    case FLASH:
-                    case SOLID:
-                        opacityDriver = new ConstantDriver(0.55f);
-                        break;
-                }
-                break;
+
             case HP_ABOVE_THRESHOLD:
-                notificationColor = config.maximumHPAlertColor();
-                notificationEffect = config.maximumHPEffectType();
-                switch (config.maximumHPEffectType()) {
-                    case FADE_IN_OUT:
-                        opacityDriver = new SineDriver(0.125f, 0.55f, 25);
-                        break;
-                    case FLASH:
-                    case SOLID:
-                        opacityDriver = new ConstantDriver(0.55f);
-                        break;
-                }
+            case OVERLOAD_ALMOST_EXPIRED:
+                notificationLength = -1;
                 break;
+
+            case OVERLOAD_EXPIRED:
+                // Only allow creation of alert if we have OVERLOAD pots in inventory.
+                if(!InventoryUtils.hasOneOfItems(client, ItemID.OVERLOAD_4, ItemID.OVERLOAD_3, ItemID.OVERLOAD_2, ItemID.OVERLOAD_1)) {
+                    return;
+                }
+
+                notificationLength = -1;
+
+                break;
+
             case ABSORPTION_BELOW_THRESHOLD:
-                notificationColor = config.absorptionAlertColor();
-                notificationEffect = config.absorptionEffectType();
-                switch (config.absorptionEffectType()) {
-                    case FADE_IN_OUT:
-                        opacityDriver = new SineDriver(0.125f, 0.55f, 25);
-                        break;
-                    case FLASH:
-                    case SOLID:
-                        opacityDriver = new ConstantDriver(0.55f);
-                        break;
+                // Only allow creation of alert if we have ABSORPTION pots in inventory.
+                if(!InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_4, ItemID.ABSORPTION_3, ItemID.ABSORPTION_2, ItemID.ABSORPTION_1)) {
+                    return;
                 }
+                notificationLength = -1;
+
                 break;
+
+            case HP_BELOW_THRESHOLD:
             case ZAPPER_SPAWNED:
-                notificationColor = config.zapperAlertColor();
-                notificationEffect = config.zapperEffectType();
-                switch (config.zapperEffectType()) {
-                    case FADE_IN_OUT:
-                        opacityDriver = new SineDriver(0f, 0.55f, 20);
-                        break;
-                    case FLASH:
-                    case SOLID:
-                        opacityDriver = new ConstantDriver(0.45f);
-                        break;
-                }
-                notificationLength = 4;
-                break;
-            case POWER_SURGE_SPAWNED:
-                notificationColor = config.powerSurgeAlertColor();
-                notificationEffect = config.powerSurgeEffectType();
-                switch (config.powerSurgeEffectType()) {
-                    case FADE_IN_OUT:
-                        opacityDriver = new SineDriver(0f, 0.55f, 20);
-                        break;
-                    case FLASH:
-                    case SOLID:
-                        opacityDriver = new ConstantDriver(0.45f);
-                        break;
-                }
-                notificationLength = 4;
-                break;
-            case RECURRENT_DAMAGE_SPAWNED:
-                notificationColor = config.recurrentDamageAlertColor();
-                notificationEffect = config.recurrentDamageEffectType();
-                switch (config.recurrentDamageEffectType()) {
-                    case FADE_IN_OUT:
-                        opacityDriver = new SineDriver(0f, 0.55f, 20);
-                        break;
-                    case FLASH:
-                    case SOLID:
-                        opacityDriver = new ConstantDriver(0.45f);
-                        break;
-                }
-                notificationLength = 4;
-                break;
             case ULTIMATE_FORCE_SPAWNED:
-                notificationColor = config.ultimateForceAlertColor();
-                notificationEffect = config.ultimateForceEffectType();
-                switch (config.ultimateForceEffectType()) {
-                    case FADE_IN_OUT:
-                        opacityDriver = new SineDriver(0f, 0.45f, 20);
-                        break;
-                    case FLASH:
-                    case SOLID:
-                        opacityDriver = new ConstantDriver(0.45f);
-                        break;
-                }
-                notificationLength = 4;
+            case POWER_SURGE_SPAWNED:
+            case RECURRENT_DAMAGE_SPAWNED:
+                notificationLength = 5;
                 break;
+
+            default:
+                // Invalid Notification...
+                return;
+        }
+
+        switch (type) {
+
+            case HP_BELOW_THRESHOLD:
+                notificationEffect = config.minimumHPEffectType();
+                break;
+
+            case HP_ABOVE_THRESHOLD:
+                notificationEffect = config.maximumHPEffectType();
+                break;
+
+            case OVERLOAD_ALMOST_EXPIRED:
+                notificationEffect = config.overloadRunOutEffectType();
+                break;
+
+            case OVERLOAD_EXPIRED:
+                notificationEffect = config.overloadExpiredEffectType();
+                break;
+
+            case ABSORPTION_BELOW_THRESHOLD:
+                notificationEffect = config.absorptionEffectType();
+                break;
+
+            case ZAPPER_SPAWNED:
+                notificationEffect = config.zapperEffectType();
+                break;
+
+            case ULTIMATE_FORCE_SPAWNED:
+                notificationEffect = config.ultimateForceEffectType();
+                break;
+
+            case POWER_SURGE_SPAWNED:
+                notificationEffect = config.powerSurgeEffectType();
+                break;
+
+            case RECURRENT_DAMAGE_SPAWNED:
+                notificationEffect = config.recurrentDamageEffectType();
+                break;
+
             default:
                 // Invalid Notification...
                 return;
@@ -157,21 +143,9 @@ public class VisualNotificationManager {
             opacityDriver = new ConstantDriver(1f);
         }
 
-        switch (notificationEffect) {
-            case FADE_IN_OUT:
-                visualNotification = new FadedVisualNotification(type, notificationColor, opacityDriver, notificationLength);
-                break;
-            case FLASH:
-                visualNotification = new FlashVisualNotification(type, notificationColor, (float) opacityDriver.getValue(), notificationLength);
-                break;
-            case SOLID:
-                visualNotification = new SolidVisualNotification(type, notificationColor, (float) opacityDriver.getValue(), notificationLength);
-                break;
-        }
+        visualNotification = new VisualNotification(config, type, notificationLength);
 
-        if(visualNotification != null) {
-            notificationList.add(visualNotification);
-        }
+        notificationList.add(visualNotification);
     }
 
 
@@ -237,6 +211,18 @@ public class VisualNotificationManager {
         if(!config.visualAlerts()) {
             notificationList.clear();
         } else {
+            if(!config.overloadRunoutNotification()) {
+                removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+            }
+            if(!config.overloadExpiredNotification()) {
+                removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+            }
+            if(!config.overloadRunoutNotification()) {
+                removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+            }
+            if(!config.overloadExpiredNotification()) {
+                removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+            }
             if(!config.absorptionNotification()) {
                 removeNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
             }
@@ -260,7 +246,9 @@ public class VisualNotificationManager {
             }
         }
 
-
+        for(VisualNotification notification : notificationList) {
+            notification.configUpdated();
+        }
     }
 
     public void clearNotifications() {
