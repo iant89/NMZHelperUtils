@@ -224,6 +224,7 @@ public class UltimateNMZPlugin extends Plugin {
 
 			final Instant now = Instant.now();
 			lastOverload = now;
+			overloadNotificationSend = true;
 
 			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
 			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
@@ -362,6 +363,7 @@ public class UltimateNMZPlugin extends Plugin {
 		}
 
 		if(System.currentTimeMillis() >= overloadTimer) {
+			overloadNotificationSend = true;
 			overloadTimer = -1;
 
 			if(InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_1, ItemID.ABSORPTION_2, ItemID.ABSORPTION_3, ItemID.ABSORPTION_4)) {
@@ -369,7 +371,10 @@ public class UltimateNMZPlugin extends Plugin {
 					if(!notificationManager.hasNotificationType(VisualNotificationType.OVERLOAD_EXPIRED)) {
 						notificationManager.removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
 						notificationManager.createNotification(VisualNotificationType.OVERLOAD_EXPIRED);
-						notifier.notify("Your Overload Potion has now expired.");
+						if(overloadNotificationSend) {
+							notifier.notify("Your Overload Potion has now expired.");
+							overloadNotificationSend = false;
+						}
 					}
 				}
 			} else {
@@ -384,7 +389,10 @@ public class UltimateNMZPlugin extends Plugin {
 					if (!notificationManager.hasNotificationType(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED)) {
 						notificationManager.createNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
 					}
-					notifier.notify("Your overload potion is about to expire!");
+					if(overloadNotificationSend) {
+						notifier.notify("Your overload potion is about to expire!");
+						overloadNotificationSend = false;
+					}
 				}
 			}
 		}
