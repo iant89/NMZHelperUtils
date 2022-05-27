@@ -1,7 +1,6 @@
 # Ultimate NMZ
 
-This plugin is intended to assist in AFK`ing the Nightmare Zone, By Showing you Visual Notifications such as Game Canvas color fading effects and icons. 
-
+This plugin is intended to assist in AFK`ing the Nightmare Zone, By Showing you Visual Notifications such as Game Canvas color fading effects and icons.
 
 ## Using Ultimate NMZ
 
@@ -14,7 +13,7 @@ Once downloaded click the Configuration Icon, and find the `Ultimate NMZ` entry.
 I've tried to make the Setup Super Simple! 
 It may seem like a lot, however it is separated to keep it from confusing you. 
 
-![](https://imgur.com/0YKGWJZ.png)
+![](https://imgur.com/G1QV5rF.png)
 
 ### General
 | Option               | Description                                       |
@@ -29,6 +28,7 @@ It may seem like a lot, however it is separated to keep it from confusing you.
 | Show Icon         | Shows Hitpoints Icon on Notification                        |
 | Color             | The Color of the notification                                                            |
 | Effect            | The Rendering Effect for the notification                             |
+| Speed             | The speed of the Notification Effect                                                                      |
 
 ### Maximum Hitpoints
 | Option            | Description                                                 |
@@ -38,14 +38,16 @@ It may seem like a lot, however it is separated to keep it from confusing you.
 | Show Icon         | Shows Hitpoints Icon on Notification                        |
 | Color             | The Color of the notification                               |
 | Effect            | The Rendering Effect for the notification                   |
+| Speed             | The speed of the Notification Effect                                                            |
 
 ### Recurrent Damage Power-Up
 | Option                        | Description                                        |
 |-------------------------------|----------------------------------------------------|
 | Show Spawn Location           | Enable/Disable drawing tile on the spawn location. |
 | Recurrent Damage Notification | Enable/Disable Notifications for Spawns.           |
-| Color                         | The Color of the notification               |
-| Effect                        | The Rendering Effect for the notification                    |
+| Color                         | The Color of the notification                      |
+| Effect                        | The Rendering Effect for the notification          |
+| Speed                         | The speed of the Notification Effect               |
 
 
 ### Zapper Power-Up
@@ -55,6 +57,7 @@ It may seem like a lot, however it is separated to keep it from confusing you.
 | Zapper Notification | Enable/Disable Notifications for Spawns.           |
 | Color               | The Color of the notification               |
 | Effect              | The Rendering Effect for the notification                    |
+| Speed               | The speed of the Notification Effect                                                             |
 
 ### Power Surge Power-Up
 | Option                   | Description                                        |
@@ -63,6 +66,7 @@ It may seem like a lot, however it is separated to keep it from confusing you.
 | Power Surge Notification | Enable/Disable Notifications for Spawns.           |
 | Color                    | The Color of the notification               |
 | Effect                   | The Rendering Effect for the notification                    |
+| Speed                    | The speed of the Notification Effect                                                             |
 
 ### Ultimate Force Power-Up
 | Option                      | Description                                        |
@@ -71,24 +75,32 @@ It may seem like a lot, however it is separated to keep it from confusing you.
 | Ultimate Force Notification | Enable/Disable Notifications for Spawns.           |
 | Color                       | The Color of the notification               |
 | Effect                      | The Rendering Effect for the notification                    |
+| Speed                       | The speed of the Notification Effect                                                             |
 
 ### Absorption
-| Option                      | Description                                                                 |
-|-----------------------------|-----------------------------------------------------------------------------|
-| Absorption Notification     | Enable/Disable Notifications when your Absorption drops below the threshold |
-| Minimum Threshold           | The minimum amount of absorption before triggering a alert.                 |
-| Show Icon                   | Shows Absorption Potion Icon on Notification.                               |
-| Color                       | The Color of the notification                                               |
-| Effect                      | The Rendering Effect for the notification                                   |
+| Option                  | Description                                                                 |
+|-------------------------|-----------------------------------------------------------------------------|
+| Absorption Notification | Enable/Disable Notifications when your Absorption drops below the threshold |
+| Minimum Threshold       | The minimum amount of absorption before triggering a alert.                 |
+| Show Icon               | Shows Absorption Potion Icon on Notification.                               |
+| Color                   | The Color of the notification                                               |
+| Effect                  | The Rendering Effect for the notification                                   |
+| Speed                   | The speed of the Notification Effect                                                                            |
 
 ### Overload
-*NOT IMPLEMENTED YET.*
-
-### Super Magic Potions
-*NOT IMPLEMENTED YET.*
-
-### Super Ranging Potions
-*NOT IMPLEMENTED YET.*
+| Option               | Description                                                                |
+|----------------------|----------------------------------------------------------------------------|
+| Warning Notification | Enable/Disable Notifications when your Overload is about to expire         |
+| Warning Seconds      | The number of seconds before your overload will expire to trigger a alert. |
+| Show Icon            | Shows Overload Potion Icon on Notification.                                |
+| Warning Color        | The Color of the Warning notification                                      |
+| Warning Effect       | The Rendering Effect for the Warning notification                          |
+| Warning Speed        | The speed of the Warning Notification Effect                               |
+| --                   | --                                                                         |
+| Expired Notification | Enable/Disable Notifications when your Overload has expired                |
+| Expired Color        | The Color of the Expired notification                                      |
+| Expired Effect       | The Rendering Effect for the Expired notification                          |
+| Expired Speed        | The speed of the Expired Notification Effect                               |
 
 ### Paint
 | Option               | Description                                                 |
@@ -100,6 +112,9 @@ If you've experienced an issue with a Ultimate NMZ, or have a recommendation on 
 
 ## Contributing
 Pull Requests are welcome!
+
+## Mentions
+[HFinner](https://github.com/HFinner) (Requesting Overload to finally get implemented!)
 
 ## Donating
 DONATING IS NOT REQUIRED, HOWEVER IT WONT BE REFUSED, AND WILL BE VERY WELL APPRECIATED!
