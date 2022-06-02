@@ -5,10 +5,7 @@ import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
 import com.github.iant89.ultimatenmz.drivers.SineDriver;
 import com.github.iant89.ultimatenmz.drivers.StepDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
-import org.w3c.dom.css.Rect;
 
-
-import javax.inject.Inject;
 import java.awt.*;
 
 public class VisualNotification {
