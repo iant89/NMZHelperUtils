@@ -1,5 +1,6 @@
 package com.github.iant89.ultimatenmz.overlays;
 
+import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import com.github.iant89.ultimatenmz.utils.NumberUtils;
 import com.github.iant89.ultimatenmz.UltimateNMZConfig;
 import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
@@ -47,6 +48,7 @@ public class UltimateNMZOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
+
         if (!plugin.isInNightmareZone()) {
 
             Widget nmzWidget = client.getWidget(WidgetInfo.NIGHTMARE_ZONE);
@@ -70,7 +72,7 @@ public class UltimateNMZOverlay extends OverlayPanel {
 
         Widget nmzWidget = client.getWidget(WidgetInfo.NIGHTMARE_ZONE);
         if(nmzWidget != null) {
-            nmzWidget.setHidden(config.moveOverlay());
+            nmzWidget.setHidden(config.removeNMZOverlay());
         }
 
         panelComponent.getChildren().add(TitleComponent.builder().text("-- Ultimate NMZ --").color(Color.GREEN).build());
@@ -113,7 +115,12 @@ public class UltimateNMZOverlay extends OverlayPanel {
         final int totalPoints = currentPoints + client.getVar(VarPlayer.NMZ_REWARD_POINTS);
         final int absorptionPoints = client.getVar(Varbits.NMZ_ABSORPTION);
 
-        String durationString = String.format("%02d:%02d:%02d", plugin.getSessionDuration().toHours(), plugin.getSessionDuration().toMinutesPart(), plugin.getSessionDuration().toSecondsPart());
+        String durationString = ""; //String.format("%02d:%02d:%02d", plugin.getSessionDuration().toHours(), plugin.getSessionDuration().toMinutesPart(), plugin.getSessionDuration().toSecondsPart());
+
+        durationString = (plugin.getSessionDuration().toHoursPart() >= 1 ? "" + plugin.getSessionDuration().toHoursPart() + ":" : "");
+        durationString += (plugin.getSessionDuration().toMinutesPart() > 9 ? "" : "0") + plugin.getSessionDuration().toMinutesPart() + ":";
+        durationString += (plugin.getSessionDuration().toSecondsPart() > 9 ? "" : "0") + plugin.getSessionDuration().toSecondsPart();
+
         panelComponent.getChildren().add(LineComponent.builder().left("Session:").right("" + durationString).rightColor(Color.GREEN).build());
         panelComponent.getChildren().add(LineComponent.builder().left("").build());
 
@@ -122,14 +129,13 @@ public class UltimateNMZOverlay extends OverlayPanel {
         panelComponent.getChildren().add(LineComponent.builder().left("").build());
 
         if(absorptionPoints == 0) {
-            absorptionColor = Color.WHITE;
-            panelComponent.getChildren().add(LineComponent.builder().left("Absorption:").right("---").rightColor(absorptionColor).build());
+            if(InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_4, ItemID.ABSORPTION_3, ItemID.ABSORPTION_2, ItemID.ABSORPTION_1)) {
+                panelComponent.getChildren().add(LineComponent.builder().left("Absorption:").right("---").rightColor(Color.WHITE).build());
+            }
         } else if(absorptionPoints <= config.absorptionThreshold()) {
-            absorptionColor = Color.RED;
-            panelComponent.getChildren().add(LineComponent.builder().left("Absorption:").right(QuantityFormatter.formatNumber(absorptionPoints)).rightColor(absorptionColor).build());
+            panelComponent.getChildren().add(LineComponent.builder().left("Absorption:").right(QuantityFormatter.formatNumber(absorptionPoints)).rightColor(Color.RED).build());
         } else {
-            absorptionColor = Color.GREEN;
-            panelComponent.getChildren().add(LineComponent.builder().left("Absorption:").right(QuantityFormatter.formatNumber(absorptionPoints)).rightColor(absorptionColor).build());
+            panelComponent.getChildren().add(LineComponent.builder().left("Absorption:").right(QuantityFormatter.formatNumber(absorptionPoints)).rightColor(Color.GREEN).build());
         }
 
         durationString = "";
@@ -138,7 +144,8 @@ public class UltimateNMZOverlay extends OverlayPanel {
             Duration overloadDuration = plugin.getOverloadDurationLeft();
 
             if(overloadDuration.toMinutesPart() > 0 || overloadDuration.toSecondsPart() > 0) {
-                durationString = String.format("%02d:%02d", overloadDuration.toMinutesPart(), overloadDuration.toSecondsPart());
+                durationString = (overloadDuration.toMinutesPart() >= 1 ? "" + overloadDuration.toMinutesPart() : "0") + ":";
+                durationString += (overloadDuration.toSecondsPart() >= 9 ? "" : "0") + overloadDuration.toSecondsPart();
 
                 if(config.overloadRunoutTime() >= overloadDuration.toSeconds()) {
                     overloadColor = Color.RED;
@@ -148,51 +155,20 @@ public class UltimateNMZOverlay extends OverlayPanel {
             }
         }
 
-        panelComponent.getChildren().add(LineComponent.builder().left("").build());
-        panelComponent.getChildren().add(LineComponent.builder().left("Points:").right(NumberUtils.format(currentPoints)).build());
-        panelComponent.getChildren().add(LineComponent.builder().left("Points/Hour:").right(NumberUtils.format(plugin.getPointsPerHour())).build());
-        panelComponent.getChildren().add(LineComponent.builder().left("Total Points:").right(NumberUtils.format(totalPoints)).build());
+        if(config.showPointsPerHour() || config.showTotalPoints() || config.removeNMZOverlay()) {
+            panelComponent.getChildren().add(LineComponent.builder().left("").build());
+        }
 
-        // Visual Notifications
-        if(config.visualAlerts()) {
-            // Absorption
-            if(config.absorptionNotification()){
-                if (absorptionPoints <= config.absorptionThreshold()) {
-                    plugin.getNotificationManager().createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-                } else {
-                    plugin.getNotificationManager().removeNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-                }
-            } else {
-                plugin.getNotificationManager().removeNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-            }
+        if(config.removeNMZOverlay()) {
+            panelComponent.getChildren().add(LineComponent.builder().left("Points:").right(NumberUtils.format(currentPoints)).build());
+        }
 
-            // Hitpoints
-            if(config.minimumHPNotification() && config.maximumHPNotification()) {
-                if (belowHPThreshold) {
-                    plugin.getNotificationManager().createNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-                } else {
-                    plugin.getNotificationManager().removeNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-                }
-                if(aboveHPThreshold) {
-                    plugin.getNotificationManager().createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-                } else {
-                    plugin.getNotificationManager().removeNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-                }
-            } else if(config.minimumHPNotification()) {
-                if (belowHPThreshold) {
-                    plugin.getNotificationManager().createNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-                } else {
-                    plugin.getNotificationManager().removeNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-                }
-            } else if(config.maximumHPNotification()) {
-                if (aboveHPThreshold) {
-                    plugin.getNotificationManager().createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-                } else {
-                    plugin.getNotificationManager().removeNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-                }
-            }
-        } else {
-            plugin.getNotificationManager().clearNotifications();
+        if(config.showPointsPerHour()) {
+            panelComponent.getChildren().add(LineComponent.builder().left("Points/Hour:").right(NumberUtils.format(plugin.getPointsPerHour())).build());
+        }
+
+        if(config.showTotalPoints()) {
+            panelComponent.getChildren().add(LineComponent.builder().left("Total Points:").right(NumberUtils.format(totalPoints)).build());
         }
 
         return super.render(graphics);

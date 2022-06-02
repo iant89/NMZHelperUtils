@@ -8,8 +8,7 @@ import com.github.iant89.ultimatenmz.drivers.ValueDriver;
 import com.github.iant89.ultimatenmz.notifications.*;
 import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import net.runelite.api.*;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.SkillIconManager;
+import net.runelite.client.game.*;
 import net.runelite.client.ui.overlay.*;
 
 import javax.inject.Inject;
@@ -47,7 +46,6 @@ public class VisualNotificationOverlay extends OverlayPanel {
         setLayer(OverlayLayer.ABOVE_SCENE);
         setPriority(OverlayPriority.HIGH);
         getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Ultimate-NMZ Notification Overlay."));
-
     }
 
     @Override
@@ -98,6 +96,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
 
             visualNotification.renderNotification(graphics, new Rectangle(x, 0, width, client.getCanvasHeight()));
 
+
             BufferedImage icon = null;
             switch (visualNotification.getType()) {
                 case HP_BELOW_THRESHOLD:
@@ -114,14 +113,54 @@ public class VisualNotificationOverlay extends OverlayPanel {
 
                 case OVERLOAD_ALMOST_EXPIRED:
                 case OVERLOAD_EXPIRED:
-                    if(config.showOverloadIcon()) {
-                        icon = itemManager.getImage(ItemID.OVERLOAD_4);
+                    if(!config.showOverloadIcon()) {
+                        icon = null;
+                        break;
+                    }
+
+                    switch (visualNotification.getAnimationDriver().getValue().intValue()) {
+                        case 0:
+                            icon = itemManager.getImage(ItemID.OVERLOAD_4);
+                            break;
+                        case 1:
+                            icon = itemManager.getImage(ItemID.OVERLOAD_3);
+                            break;
+                        case 2:
+                            icon = itemManager.getImage(ItemID.OVERLOAD_2);
+                            break;
+                        case 3:
+                            icon = itemManager.getImage(ItemID.OVERLOAD_1);
+                            break;
+                        case 4:
+                            icon = itemManager.getImage(ItemID.VIAL);
+                            break;
+
                     }
                     break;
 
                 case ABSORPTION_BELOW_THRESHOLD:
-                    if(config.showAbsorptionIcon()) {
-                        icon = itemManager.getImage(ItemID.ABSORPTION_4);
+                    if(!config.showAbsorptionIcon()) {
+                        icon = null;
+                        break;
+                    }
+
+                    switch (visualNotification.getAnimationDriver().getValue().intValue()) {
+                        case 0:
+                            icon = itemManager.getImage(ItemID.ABSORPTION_4);
+                            break;
+                        case 1:
+                            icon = itemManager.getImage(ItemID.ABSORPTION_3);
+                            break;
+                        case 2:
+                            icon = itemManager.getImage(ItemID.ABSORPTION_2);
+                            break;
+                        case 3:
+                            icon = itemManager.getImage(ItemID.ABSORPTION_1);
+                            break;
+                        case 4:
+                            icon = itemManager.getImage(ItemID.VIAL);
+                            break;
+
                     }
                     break;
 
@@ -136,10 +175,10 @@ public class VisualNotificationOverlay extends OverlayPanel {
                 int iW = (int) (icon.getWidth() * iconSize);
                 int iH = (int) (icon.getHeight() * iconSize);
 
-                float iconOpacity = 1f - (float) opacityDriver.getValue();
+                float iconOpacity = 1f - opacityDriver.getValue().floatValue();
 
                 if(opacityDriver instanceof ConstantDriver) {
-                    iconOpacity = (float) opacityDriver.getValue();
+                    iconOpacity = opacityDriver.getValue().floatValue();
                 }
 
                 graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, iconOpacity));

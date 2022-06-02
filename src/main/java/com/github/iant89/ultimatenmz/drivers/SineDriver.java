@@ -64,7 +64,6 @@ public class SineDriver extends ValueDriver<Float> {
 			}
 		}
 
-		//float step = (getMaximum() - getMinimum()) / getDuration();
 		float step = (getMaximum() - getMinimum()) / getDuration();
 
 		if(driveDown) {
