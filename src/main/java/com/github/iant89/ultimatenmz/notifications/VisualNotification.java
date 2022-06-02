@@ -3,7 +3,9 @@ package com.github.iant89.ultimatenmz.notifications;
 import com.github.iant89.ultimatenmz.UltimateNMZConfig;
 import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
 import com.github.iant89.ultimatenmz.drivers.SineDriver;
+import com.github.iant89.ultimatenmz.drivers.StepDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
+import org.w3c.dom.css.Rect;
 
 
 import javax.inject.Inject;
@@ -14,6 +16,8 @@ public class VisualNotification {
     private VisualNotificationType notificationType;
 
     private ValueDriver opacityDriver;
+    private ValueDriver animationDriver;
+
     private long notificationLength = -1;
     private long notificationExpireTime = -1;
     private boolean notificationExpired = false;
@@ -49,6 +53,8 @@ public class VisualNotification {
                 opacityDriver = new ConstantDriver(1f);
                 break;
         }
+
+        animationDriver = new StepDriver(0, 4, 250);
     }
 
     public void configUpdated() {
@@ -140,6 +146,13 @@ public class VisualNotification {
 
     }
 
+    private void renderBorder(Graphics2D graphics, Rectangle bounds, Color color, float size) {
+        graphics.setColor(color);
+        graphics.setStroke(new BasicStroke(size));
+        graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        graphics.setStroke(new BasicStroke(1f));
+    }
+
     private void renderFadeNotification(Graphics2D graphics, Rectangle bounds) {
         if(getOpacityDriver() == null) {
             return;
@@ -152,9 +165,7 @@ public class VisualNotification {
         graphics.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
         // Draw Border
-        graphics.setStroke(new BasicStroke(2f));
-        graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        graphics.setStroke(new BasicStroke(1f));
+        renderBorder(graphics, bounds, getColor(), 2f);
 
         graphics.setComposite(originalComposite);
     }
@@ -185,9 +196,8 @@ public class VisualNotification {
 
         graphics.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
-        graphics.setStroke(new BasicStroke(2f));
-        graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        graphics.setStroke(new BasicStroke(1f));
+        // Draw Border
+        renderBorder(graphics, bounds, getColor(), 2f);
 
         graphics.setComposite(originalComposite);
     }
@@ -204,9 +214,8 @@ public class VisualNotification {
 
         graphics.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
-        graphics.setStroke(new BasicStroke(2f));
-        graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        graphics.setStroke(new BasicStroke(1f));
+        // Draw Border
+        renderBorder(graphics, bounds, getColor(), 2f);
 
         graphics.setComposite(originalComposite);
     }
@@ -320,4 +329,6 @@ public class VisualNotification {
     public ValueDriver getOpacityDriver() {
         return opacityDriver;
     }
+
+    public ValueDriver getAnimationDriver() { return animationDriver; }
 }

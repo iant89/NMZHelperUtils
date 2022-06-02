@@ -123,6 +123,17 @@ public interface UltimateNMZConfig extends Config {
         return true;
     }
 
+    @ConfigItem(
+            keyName = "nativeAlerts",
+            name = "Native Notifications",
+            description = "Toggles native notifications.",
+            position = 1,
+            section = generalSection
+    )
+    default boolean nativeAlerts() {
+        return true;
+    }
+
     /*
      * MINIMUM HP SECTION
      */
@@ -691,13 +702,35 @@ public interface UltimateNMZConfig extends Config {
      */
 
     @ConfigItem(
-            keyName = "moveoverlay",
+            keyName = "removeNMZOverlay",
             name = "Override NMZ overlay",
-            description = "Overrides the overlay so it doesn't conflict with other RuneLite plugins",
+            description = "Removes the Nightmare Zone Point overlay.",
             position = 0,
             section = paintSection
     )
-    default boolean moveOverlay() {
+    default boolean removeNMZOverlay() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "showPointsPerHour",
+            name = "Show Points Per Hour",
+            description = "Shows the Estimated Points Per Hour",
+            position = 1,
+            section = paintSection
+    )
+    default boolean showPointsPerHour() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "showTotalPoints",
+            name = "Show Total Points Earned",
+            description = "Shows the total points you have earned.",
+            position = 2,
+            section = paintSection
+    )
+    default boolean showTotalPoints() {
         return true;
     }
 }

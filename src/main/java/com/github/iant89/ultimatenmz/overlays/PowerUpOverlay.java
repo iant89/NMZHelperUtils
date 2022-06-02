@@ -33,6 +33,7 @@ public class PowerUpOverlay extends OverlayPanel {
         this.config = config;
 
         setPosition(OverlayPosition.DYNAMIC);
+        setMovable(false);
         setLayer(OverlayLayer.ABOVE_SCENE);
         setPriority(OverlayPriority.HIGH);
         getMenuEntries().add(new OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Ultimate NMZ Overlay."));

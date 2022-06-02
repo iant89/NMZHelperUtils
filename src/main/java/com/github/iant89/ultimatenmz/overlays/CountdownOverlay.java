@@ -10,6 +10,7 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
+import net.runelite.client.util.ColorUtil;
 
 import javax.inject.Inject;
 
@@ -50,7 +51,8 @@ public class CountdownOverlay extends OverlayPanel {
         int secondsRemaining = (int) Duration.between(Instant.now(), endTime).toSeconds();
 
         if(secondsRemaining > 0) {
-            panelComponent.getChildren().add(TitleComponent.builder().text("NMZ Starts in " + secondsRemaining + " secs.").build());
+            panelComponent.getChildren().add(TitleComponent.builder().text("NMZ STARTING IN").build());
+            panelComponent.getChildren().add(TitleComponent.builder().text("" + secondsRemaining + " SECOND" + (secondsRemaining > 1 ? "S" : "") + ".").color(Color.YELLOW).build());
         } else {
             endTime = null;
         }
