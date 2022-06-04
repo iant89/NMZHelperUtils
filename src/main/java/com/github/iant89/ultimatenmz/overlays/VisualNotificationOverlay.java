@@ -5,6 +5,7 @@ import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
 import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
 import com.github.iant89.ultimatenmz.drivers.SineDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
+import com.github.iant89.ultimatenmz.icons.IconManager;
 import com.github.iant89.ultimatenmz.notifications.*;
 import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import net.runelite.api.*;
@@ -29,6 +30,8 @@ public class VisualNotificationOverlay extends OverlayPanel {
     private final SkillIconManager skillIconManager;
     private final ItemManager itemManager;
 
+    @Inject
+    private IconManager iconManager;
     private ValueDriver iconSizeDriver = new SineDriver(2f, 5f, 25);
 
     @Inject
@@ -50,6 +53,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
+
 
         if(!config.visualAlerts() || !plugin.isInNightmareZone()) {
             return super.render(graphics);
@@ -79,6 +83,7 @@ public class VisualNotificationOverlay extends OverlayPanel {
         int x = 0;
         int width = client.getCanvasWidth() / notificationList.size();
 
+        Rectangle notificationBounds;
         while(notificationIterator.hasNext()) {
             VisualNotification visualNotification = (VisualNotification) notificationIterator.next();
 
@@ -94,84 +99,29 @@ public class VisualNotificationOverlay extends OverlayPanel {
                 opacityDriver.setValue(1f);
             }
 
-            visualNotification.renderNotification(graphics, new Rectangle(x, 0, width, client.getCanvasHeight()));
+            notificationBounds = new Rectangle(x, 0, width, client.getCanvasHeight());
 
+            graphics.setClip(notificationBounds);
 
-            BufferedImage icon = null;
-            switch (visualNotification.getType()) {
-                case HP_BELOW_THRESHOLD:
-                    if(config.showMinimumHPIcon()) {
-                        icon = skillIconManager.getSkillImage(Skill.HITPOINTS);
-                    }
-                    break;
+            visualNotification.renderNotification(graphics, notificationBounds);
 
-                case HP_ABOVE_THRESHOLD:
-                    if(config.showMaximumHPIcon()) {
-                        icon = skillIconManager.getSkillImage(Skill.HITPOINTS);
-                    }
-                    break;
+            graphics.setClip(null);
 
-                case OVERLOAD_ALMOST_EXPIRED:
-                case OVERLOAD_EXPIRED:
-                    if(!config.showOverloadIcon()) {
-                        icon = null;
-                        break;
-                    }
-
-                    switch (visualNotification.getAnimationDriver().getValue().intValue()) {
-                        case 0:
-                            icon = itemManager.getImage(ItemID.OVERLOAD_4);
-                            break;
-                        case 1:
-                            icon = itemManager.getImage(ItemID.OVERLOAD_3);
-                            break;
-                        case 2:
-                            icon = itemManager.getImage(ItemID.OVERLOAD_2);
-                            break;
-                        case 3:
-                            icon = itemManager.getImage(ItemID.OVERLOAD_1);
-                            break;
-                        case 4:
-                            icon = itemManager.getImage(ItemID.VIAL);
-                            break;
-
-                    }
-                    break;
-
-                case ABSORPTION_BELOW_THRESHOLD:
-                    if(!config.showAbsorptionIcon()) {
-                        icon = null;
-                        break;
-                    }
-
-                    switch (visualNotification.getAnimationDriver().getValue().intValue()) {
-                        case 0:
-                            icon = itemManager.getImage(ItemID.ABSORPTION_4);
-                            break;
-                        case 1:
-                            icon = itemManager.getImage(ItemID.ABSORPTION_3);
-                            break;
-                        case 2:
-                            icon = itemManager.getImage(ItemID.ABSORPTION_2);
-                            break;
-                        case 3:
-                            icon = itemManager.getImage(ItemID.ABSORPTION_1);
-                            break;
-                        case 4:
-                            icon = itemManager.getImage(ItemID.VIAL);
-                            break;
-
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-
+            BufferedImage icon = iconManager.getIconForNotification(visualNotification);
 
             if(icon != null) {
                 final Composite originalComposite = graphics.getComposite();
-                final double iconSize = iconSizeDriver.getValue().doubleValue();
+                double iconSize = iconSizeDriver.getValue().doubleValue();
+
+                switch (visualNotification.getType()) {
+                    case ZAPPER_SPAWNED:
+                    case ULTIMATE_FORCE_SPAWNED:
+                    case POWER_SURGE_SPAWNED:
+                    case RECURRENT_DAMAGE_SPAWNED:
+                        iconSize /= 4;
+                        break;
+                }
+
                 int iW = (int) (icon.getWidth() * iconSize);
                 int iH = (int) (icon.getHeight() * iconSize);
 
@@ -191,4 +141,6 @@ public class VisualNotificationOverlay extends OverlayPanel {
 
         return super.render(graphics);
     }
+
+
 }

@@ -122,7 +122,7 @@ public class PowerUpOverlay extends OverlayPanel {
                 }
 
                 if(gameObject.getSceneMinLocation().equals(tile.getSceneLocation())) {
-                    if (player.getLocalLocation().distanceTo(gameObject.getLocalLocation()) <= 1500) {
+                    if (player.getLocalLocation().distanceTo(gameObject.getLocalLocation()) <= 3500) {
                         LocalPoint lp = gameObject.getLocalLocation();
                         Polygon tilePoly = Perspective.getCanvasTileAreaPoly(client, lp, 1);
 

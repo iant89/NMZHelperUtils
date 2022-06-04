@@ -2,6 +2,7 @@ package com.github.iant89.ultimatenmz.overlays;
 
 import com.github.iant89.ultimatenmz.UltimateNMZConfig;
 import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
+import com.github.iant89.ultimatenmz.utils.DurationUtils;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
@@ -48,11 +49,11 @@ public class CountdownOverlay extends OverlayPanel {
             return super.render(graphics);
         }
 
-        int secondsRemaining = (int) Duration.between(Instant.now(), endTime).toSeconds();
+        long secondsRemaining = DurationUtils.toSecondsPart(Duration.between(Instant.now(), endTime));
 
         if(secondsRemaining > 0) {
             panelComponent.getChildren().add(TitleComponent.builder().text("NMZ STARTING IN").build());
-            panelComponent.getChildren().add(TitleComponent.builder().text("" + secondsRemaining + " SECOND" + (secondsRemaining > 1 ? "S" : "") + ".").color(Color.YELLOW).build());
+            panelComponent.getChildren().add(TitleComponent.builder().text("" + secondsRemaining + " SECOND" + (secondsRemaining > 1 ? "S" : "") + ".").color(Color.GREEN).build());
         } else {
             endTime = null;
         }
