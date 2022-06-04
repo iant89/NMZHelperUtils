@@ -11,12 +11,14 @@ import net.runelite.api.ItemID;
 import javax.inject.Inject;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class VisualNotificationManager {
 
     private static ArrayList<VisualNotification> notificationList = new ArrayList<>();
-
+    private static HashMap<VisualNotificationType, Long> notificationBlockMap = new HashMap<>();
     @Inject
     private Client client;
 
@@ -30,7 +32,27 @@ public class VisualNotificationManager {
         this.config = config;
     }
 
+    public void blockNotification(VisualNotificationType type, int seconds) {
+        cleanNotifications();
+
+        if(seconds <= 0) {
+            return;
+        }
+
+        if(notificationBlockMap.containsKey(type)) {
+            notificationBlockMap.remove(type);
+        }
+
+        notificationBlockMap.put(type, System.currentTimeMillis() + (seconds * 1000));
+    }
+
     public void addNotification(VisualNotification notification) {
+        cleanNotifications();
+
+        if(notificationBlockMap.containsKey(notification.getType())) {
+            return;
+        }
+
         notificationList.add(notification);
     }
 
@@ -41,9 +63,12 @@ public class VisualNotificationManager {
     public synchronized void createNotification(VisualNotificationType type) {
         VisualNotification visualNotification = getNotificationByType(type);
         long notificationLength = -1;
-        Color notificationColor;
-        ValueDriver opacityDriver = null;
-        VisualNotificationEffectType notificationEffect;
+
+        cleanNotifications();
+
+        if(notificationBlockMap.containsKey(type)) {
+            return;
+        }
 
         if(visualNotification != null) {
             if(visualNotification.getLength() == -1) {
@@ -84,50 +109,7 @@ public class VisualNotificationManager {
             case ULTIMATE_FORCE_SPAWNED:
             case POWER_SURGE_SPAWNED:
             case RECURRENT_DAMAGE_SPAWNED:
-                notificationLength = 5;
-                break;
-
-            default:
-                // Invalid Notification...
-                return;
-        }
-
-        switch (type) {
-
-            case HP_BELOW_THRESHOLD:
-                notificationEffect = config.minimumHPEffectType();
-                break;
-
-            case HP_ABOVE_THRESHOLD:
-                notificationEffect = config.maximumHPEffectType();
-                break;
-
-            case OVERLOAD_ALMOST_EXPIRED:
-                notificationEffect = config.overloadRunOutEffectType();
-                break;
-
-            case OVERLOAD_EXPIRED:
-                notificationEffect = config.overloadExpiredEffectType();
-                break;
-
-            case ABSORPTION_BELOW_THRESHOLD:
-                notificationEffect = config.absorptionEffectType();
-                break;
-
-            case ZAPPER_SPAWNED:
-                notificationEffect = config.zapperEffectType();
-                break;
-
-            case ULTIMATE_FORCE_SPAWNED:
-                notificationEffect = config.ultimateForceEffectType();
-                break;
-
-            case POWER_SURGE_SPAWNED:
-                notificationEffect = config.powerSurgeEffectType();
-                break;
-
-            case RECURRENT_DAMAGE_SPAWNED:
-                notificationEffect = config.recurrentDamageEffectType();
+                notificationLength = 10;
                 break;
 
             default:
@@ -137,10 +119,6 @@ public class VisualNotificationManager {
 
         if(notificationLength > -1) {
             notificationLength = notificationLength * 1000;
-        }
-
-        if(opacityDriver == null) {
-            opacityDriver = new ConstantDriver(1f);
         }
 
         visualNotification = new VisualNotification(config, type, notificationLength);
@@ -160,6 +138,12 @@ public class VisualNotificationManager {
 
     public synchronized void cleanNotifications() {
         notificationList.removeIf(VisualNotification::isExpired);
+
+        for(Map.Entry<VisualNotificationType, Long> entry : notificationBlockMap.entrySet()) {
+            if(System.currentTimeMillis() >= entry.getValue()) {
+                notificationBlockMap.remove(entry.getKey());
+            }
+        }
     }
 
     public ArrayList<VisualNotification> getNotificationsByPriority(int priority) {

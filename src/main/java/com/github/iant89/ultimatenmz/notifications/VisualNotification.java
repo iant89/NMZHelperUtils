@@ -51,7 +51,7 @@ public class VisualNotification {
                 break;
         }
 
-        animationDriver = new StepDriver(0, 4, 250);
+        animationDriver = new StepDriver(0, 4, 300);
     }
 
     public void configUpdated() {

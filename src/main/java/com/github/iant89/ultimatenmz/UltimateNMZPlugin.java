@@ -127,14 +127,6 @@ public class UltimateNMZPlugin extends Plugin {
 		overlayManager.add(notificationOverlay);
 		overlayManager.add(ultimateNmzOverlay);
 
-		// Debug
-		notificationManager.addNotification(new VisualNotification(config, VisualNotificationType.OVERLOAD_EXPIRED, -1));
-		//notificationManager.addNotification(new SolidVisualNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, config.maximumHPAlertColor(), 0.55f, -1));
-		//notificationManager.addNotification(new FlashVisualNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED, config.recurrentDamageAlertColor(), 0.55f, -1));
-		//notificationManager.addNotification(new FadedVisualNotification(VisualNotificationType.ZAPPER_SPAWNED, config.zapperAlertColor(), new SineDriver(0f, 0.55f, 20), -1));
-		//notificationManager.createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-		//notificationManager.createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-
 		if(client.getGameState() == GameState.LOGGED_IN) {
 			clientThread.invoke(this::start);
 		}
@@ -216,11 +208,9 @@ public class UltimateNMZPlugin extends Plugin {
 	private void onChatMessage(ChatMessage event) {
 		String msg = Text.removeTags(event.getMessage());
 
-		//log.info("ChatMessage [" + event.getType().name() + ", \"" + msg + "\")");
-
 		if(msg.contains("You drink some of your overload potion.")) {
 
-			// Drinking a Overload Potion
+			// Drinking an Overload Potion
 			log.debug("Player drank a overload potion");
 
 			overloadTimer = System.currentTimeMillis() + ((5 * 60) * 1000);
@@ -231,6 +221,15 @@ public class UltimateNMZPlugin extends Plugin {
 
 			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
 			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+
+			if(config.maximumHPNotification()) {
+				int hpLeft = client.getBoostedSkillLevel(Skill.HITPOINTS) - 50;
+
+				if(hpLeft <= config.maximumHPThresholdValue()) {
+					getNotificationManager().removeNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
+					getNotificationManager().blockNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, 15);
+				}
+			}
 			return;
 
 		}
@@ -241,6 +240,8 @@ public class UltimateNMZPlugin extends Plugin {
 		}
 
 		if (msg.contains("effects of overload have worn off")) {
+
+			getNotificationManager().blockNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, 2);
 
 			overloadTimer = -1;
 			// Overload Potion worn off
@@ -409,7 +410,7 @@ public class UltimateNMZPlugin extends Plugin {
 		} else if(System.currentTimeMillis() >= (overloadTimer - (config.overloadRunoutTime() * 1000))) {
 			if(config.overloadRunoutNotification()) {
 
-				// If we dont check before creating it will spam native notifications every 30 seconds.
+				// If we don't check before creating it will spam native notifications every 30 seconds.
 				if(!notificationManager.hasNotificationType(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED)) {
 					notificationManager.createNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
 
@@ -594,7 +595,7 @@ public class UltimateNMZPlugin extends Plugin {
 			return true;
 		}
 
-		if(Duration.between(Instant.now(), instant).toSeconds() > duration.toSeconds()) {
+		if(Duration.between(Instant.now(), instant).getSeconds() > duration.getSeconds()) {
 			return true;
 		}
 
