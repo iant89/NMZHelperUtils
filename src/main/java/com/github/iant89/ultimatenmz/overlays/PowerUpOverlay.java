@@ -1,7 +1,9 @@
 package com.github.iant89.ultimatenmz.overlays;
 
-import com.github.iant89.ultimatenmz.UltimateNMZConfig;
 import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
+import com.github.iant89.ultimatenmz.drivers.SineDriver;
+import com.github.iant89.ultimatenmz.drivers.ValueDriver;
+import com.github.iant89.ultimatenmz.utils.DirectionArrow;
 import net.runelite.api.*;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
@@ -10,6 +12,7 @@ import net.runelite.client.ui.overlay.*;
 import javax.inject.Inject;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
@@ -20,17 +23,16 @@ public class PowerUpOverlay extends OverlayPanel {
     public static final int OBJECT_RECURRENT_DAMAGE = ObjectID.RECURRENT_DAMAGE;
     public static final int OBJECT_ULTIMATE_FORCE = ObjectID.ULTIMATE_FORCE;
 
-    private final Client client;
-    private final UltimateNMZConfig config;
-    private final UltimateNMZPlugin plugin;
+    private UltimateNMZPlugin plugin;
 
+    private ValueDriver opacityDriver = new SineDriver(0.125f, 0.55f, 25);
+
+    private ValueDriver sizeDriver = new SineDriver(1f, 3f, 25);
     @Inject
-    private PowerUpOverlay(Client client, UltimateNMZConfig config, UltimateNMZPlugin plugin) {
+    private PowerUpOverlay(UltimateNMZPlugin plugin) {
         super(plugin);
 
         this.plugin = plugin;
-        this.client = client;
-        this.config = config;
 
         setPosition(OverlayPosition.DYNAMIC);
         setMovable(false);
@@ -41,6 +43,9 @@ public class PowerUpOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
+        if(plugin == null) {
+            return super.render(graphics);
+        }
         if(!plugin.isInNightmareZone()) {
             return super.render(graphics);
         }
@@ -55,10 +60,10 @@ public class PowerUpOverlay extends OverlayPanel {
             return;
         }
 
-        Scene scene = client.getScene();
+        Scene scene = plugin.getClient().getScene();
         Tile[][][] tiles = scene.getTiles();
 
-        int z = client.getPlane();
+        int z = plugin.getClient().getPlane();
 
         for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
             for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
@@ -68,15 +73,13 @@ public class PowerUpOverlay extends OverlayPanel {
                     continue;
                 }
 
-                renderGameObjects(graphics, tile, client.getLocalPlayer());
+                renderGameObjects(graphics, tile, plugin.getClient().getLocalPlayer());
             }
         }
     }
 
     private void renderGameObjects(Graphics2D graphics, Tile tile, Player player) {
         GameObject[] gameObjects = tile.getGameObjects();
-
-
 
         if (gameObjects != null) {
             for (GameObject gameObject : gameObjects) {
@@ -89,42 +92,67 @@ public class PowerUpOverlay extends OverlayPanel {
 
                 switch(gameObject.getId()) {
                     case OBJECT_POWER_SURGE:
-                        if(!config.drawPowerSurgeLocation()) {
+                        if(!plugin.getConfig().drawPowerSurgeLocation()) {
                             continue;
                         }
                         objectName = "POWER SURGE";
-                        objectColor = config.powerSurgeAlertColor();
+                        objectColor = plugin.getConfig().powerSurgeAlertColor();
                         break;
                     case OBJECT_RECURRENT_DAMAGE:
-                        if(!config.drawRecurrentDamageLocation()) {
+                        if(!plugin.getConfig().drawRecurrentDamageLocation()) {
                             continue;
                         }
                         objectName = "RECURRENT DAMAGE";
-                        objectColor = config.recurrentDamageAlertColor();
+                        objectColor = plugin.getConfig().recurrentDamageAlertColor();
                         break;
                     case OBJECT_ZAPPER:
-                        if(!config.drawZapperLocation()) {
+                        if(!plugin.getConfig().drawZapperLocation()) {
                             continue;
                         }
                         objectName = "ZAPPER";
-                        objectColor = config.zapperAlertColor();
+                        objectColor = plugin.getConfig().zapperAlertColor();
                         break;
                     case OBJECT_ULTIMATE_FORCE:
-                        if(!config.drawUltimateForceLocation()) {
+                        if(!plugin.getConfig().drawUltimateForceLocation()) {
                             continue;
                         }
                         objectName = "ULTIMATE FORCE";
-                        objectColor = config.ultimateForceAlertColor();
+                        objectColor = plugin.getConfig().ultimateForceAlertColor();
                         break;
 
                     default:
                         continue;
                 }
 
+                Composite originalComposite = graphics.getComposite();
+
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacityDriver.getValue().floatValue()));
+
+                // Draw Arrow
+                LocalPoint lp = tile.getLocalLocation();
+
+                Polygon poly = Perspective.getCanvasTilePoly(plugin.getClient(), lp, 30);
+                if (poly == null || poly.getBounds() == null)
+                {
+                    return;
+                }
+
+                int arrowWidth = 5;
+                int arrowHeight = 4;
+                int arrowLineWidth = 9;
+
+                int startX = poly.getBounds().x + (poly.getBounds().width / 2) - (arrowWidth / 2);
+                int startY = poly.getBounds().y + (poly.getBounds().height / 2) - (arrowHeight / 2);
+
+                //DirectionArrow.drawArrow(graphics, line, objectColor, arrowWidth, arrowHeight, arrowLineWidth);
+
+                DirectionArrow.drawWorldArrow(graphics, objectColor, startX, startY);
+
+
                 if(gameObject.getSceneMinLocation().equals(tile.getSceneLocation())) {
-                    if (player.getLocalLocation().distanceTo(gameObject.getLocalLocation()) <= 3500) {
-                        LocalPoint lp = gameObject.getLocalLocation();
-                        Polygon tilePoly = Perspective.getCanvasTileAreaPoly(client, lp, 1);
+                    if (player.getLocalLocation().distanceTo(gameObject.getLocalLocation()) <= 4500) {
+                        lp = gameObject.getLocalLocation();
+                        Polygon tilePoly = Perspective.getCanvasTileAreaPoly(plugin.getClient(), lp, 1);
 
                         OverlayUtil.renderPolygon(graphics, tilePoly, objectColor, new BasicStroke(2f));
 
@@ -132,6 +160,8 @@ public class PowerUpOverlay extends OverlayPanel {
                         OverlayUtil.renderTextLocation(graphics, textLocation, objectName, objectColor);
                     }
                 }
+
+                graphics.setComposite(originalComposite);
             }
         }
     }

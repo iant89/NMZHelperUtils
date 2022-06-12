@@ -1,6 +1,6 @@
 package com.github.iant89.ultimatenmz.notifications;
 
-public enum VisualNotificationEffectType {
+public enum NotificationEffectType {
     FADE_IN_OUT("Fade IN/OUT"),
     FLASH("Flash"),
     SOLID("Solid"),
@@ -9,7 +9,7 @@ public enum VisualNotificationEffectType {
 
     final String name;
 
-    VisualNotificationEffectType(String name) {
+    NotificationEffectType(String name) {
         this.name = name;
     }
 

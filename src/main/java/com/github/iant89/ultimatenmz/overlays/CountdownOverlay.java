@@ -23,10 +23,10 @@ import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
 public class CountdownOverlay extends OverlayPanel {
 
+    private UltimateNMZPlugin plugin;
 
     private final Client client;
     private final UltimateNMZConfig config;
-    private final UltimateNMZPlugin plugin;
 
     private Instant endTime;
 
@@ -45,7 +45,7 @@ public class CountdownOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        if(endTime == null) {
+        if(endTime == null || !plugin.getConfig().showCountdownOverlay()) {
             return super.render(graphics);
         }
 

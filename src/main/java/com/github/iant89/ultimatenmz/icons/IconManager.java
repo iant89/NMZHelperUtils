@@ -1,7 +1,8 @@
 package com.github.iant89.ultimatenmz.icons;
 
 import com.github.iant89.ultimatenmz.UltimateNMZConfig;
-import com.github.iant89.ultimatenmz.notifications.VisualNotification;
+import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
+import com.github.iant89.ultimatenmz.notifications.Notification;
 import net.runelite.api.ItemID;
 import net.runelite.api.Skill;
 import net.runelite.client.game.ItemManager;
@@ -14,8 +15,8 @@ import java.io.IOException;
 
 public class IconManager {
 
-    @Inject
-    private UltimateNMZConfig config;
+    private final UltimateNMZPlugin plugin;
+
     @Inject
     private SkillIconManager skillIconManager;
     @Inject
@@ -24,8 +25,9 @@ public class IconManager {
     private static BufferedImage[] powerupIcons;
 
     @Inject
-    protected IconManager(UltimateNMZConfig config, SkillIconManager skillIconManager, ItemManager itemManager) {
-        this.config = config;
+    protected IconManager(UltimateNMZPlugin plugin, SkillIconManager skillIconManager, ItemManager itemManager) {
+        this.plugin = plugin;
+
         this.skillIconManager = skillIconManager;
         this.itemManager = itemManager;
 
@@ -61,8 +63,8 @@ public class IconManager {
         return image;
     }
 
-    public BufferedImage getIconForNotification(VisualNotification visualNotification) {
-        switch (visualNotification.getType()) {
+    public BufferedImage getIconForNotification(Notification notification) {
+        switch (notification.getType()) {
             case ZAPPER_SPAWNED:
                 return powerupIcons[0];
 
@@ -76,14 +78,14 @@ public class IconManager {
                 return powerupIcons[3];
 
             case HP_BELOW_THRESHOLD:
-                if(config.showMinimumHPIcon()) {
+                if(plugin.getConfig().showMinimumHPIcon()) {
                     return skillIconManager.getSkillImage(Skill.HITPOINTS);
                 }
 
                 return null;
 
             case HP_ABOVE_THRESHOLD:
-                if(config.showMaximumHPIcon()) {
+                if(plugin.getConfig().showMaximumHPIcon()) {
                     return skillIconManager.getSkillImage(Skill.HITPOINTS);
                 }
 
@@ -91,11 +93,11 @@ public class IconManager {
 
             case OVERLOAD_ALMOST_EXPIRED:
             case OVERLOAD_EXPIRED:
-                if(!config.showOverloadIcon()) {
+                if(!plugin.getConfig().showOverloadIcon()) {
                     return null;
                 }
 
-                switch (visualNotification.getAnimationDriver().getValue().intValue()) {
+                switch (notification.getAnimationDriver().getValue().intValue()) {
                     case 0:
                         return itemManager.getImage(ItemID.OVERLOAD_4);
 
@@ -115,11 +117,11 @@ public class IconManager {
                 return null;
 
             case ABSORPTION_BELOW_THRESHOLD:
-                if(!config.showAbsorptionIcon()) {
+                if(!plugin.getConfig().showAbsorptionIcon()) {
                     return null;
                 }
 
-                switch (visualNotification.getAnimationDriver().getValue().intValue()) {
+                switch (notification.getAnimationDriver().getValue().intValue()) {
                     case 0:
                         return itemManager.getImage(ItemID.ABSORPTION_4);
 

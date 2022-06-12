@@ -1,7 +1,7 @@
 package com.github.iant89.ultimatenmz;
 
-import com.github.iant89.ultimatenmz.notifications.VisualNotificationEffectType;
-import com.github.iant89.ultimatenmz.notifications.VisualNotificationSpeed;
+import com.github.iant89.ultimatenmz.notifications.NotificationEffectType;
+import com.github.iant89.ultimatenmz.notifications.NotificationSpeed;
 import net.runelite.client.config.*;
 
 import java.awt.*;
@@ -189,8 +189,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = minimumHitpointsSection
     )
-    default VisualNotificationEffectType minimumHPEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType minimumHPEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -200,8 +200,8 @@ public interface UltimateNMZConfig extends Config {
             position = 5,
             section = minimumHitpointsSection
     )
-    default VisualNotificationSpeed minimumHPEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed minimumHPEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -259,8 +259,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = maximumHitpointsSection
     )
-    default VisualNotificationEffectType maximumHPEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType maximumHPEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -270,8 +270,8 @@ public interface UltimateNMZConfig extends Config {
             position = 5,
             section = maximumHitpointsSection
     )
-    default VisualNotificationSpeed maximumHPEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed maximumHPEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -318,8 +318,8 @@ public interface UltimateNMZConfig extends Config {
             position = 3,
             section = recurrentDamagePowerupSection
     )
-    default VisualNotificationEffectType recurrentDamageEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType recurrentDamageEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -329,8 +329,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = recurrentDamagePowerupSection
     )
-    default VisualNotificationSpeed recurrentDamageEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed recurrentDamageEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -377,8 +377,8 @@ public interface UltimateNMZConfig extends Config {
             position = 3,
             section = zapperPowerupSection
     )
-    default VisualNotificationEffectType zapperEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType zapperEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -388,8 +388,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = zapperPowerupSection
     )
-    default VisualNotificationSpeed zapperEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed zapperEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -436,8 +436,8 @@ public interface UltimateNMZConfig extends Config {
             position = 3,
             section = powerSurgePowerupSection
     )
-    default VisualNotificationEffectType powerSurgeEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType powerSurgeEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -447,8 +447,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = powerSurgePowerupSection
     )
-    default VisualNotificationSpeed powerSurgeEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed powerSurgeEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -495,8 +495,8 @@ public interface UltimateNMZConfig extends Config {
             position = 3,
             section = ultimateForcePowerupSection
     )
-    default VisualNotificationEffectType ultimateForceEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType ultimateForceEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -506,8 +506,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = ultimateForcePowerupSection
     )
-    default VisualNotificationSpeed ultimateForceEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed ultimateForceEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -568,8 +568,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = overloadSection
     )
-    default VisualNotificationEffectType overloadRunOutEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType overloadRunOutEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -579,8 +579,8 @@ public interface UltimateNMZConfig extends Config {
             position = 5,
             section = overloadSection
     )
-    default VisualNotificationSpeed overloadRunOutEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed overloadRunOutEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     @ConfigItem(
@@ -611,8 +611,8 @@ public interface UltimateNMZConfig extends Config {
             position = 8,
             section = overloadSection
     )
-    default VisualNotificationEffectType overloadExpiredEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType overloadExpiredEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -622,8 +622,8 @@ public interface UltimateNMZConfig extends Config {
             position = 9,
             section = overloadSection
     )
-    default VisualNotificationSpeed overloadExpiredEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed overloadExpiredEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -682,8 +682,8 @@ public interface UltimateNMZConfig extends Config {
             position = 4,
             section = absorptionSection
     )
-    default VisualNotificationEffectType absorptionEffectType() {
-        return VisualNotificationEffectType.FADE_IN_OUT;
+    default NotificationEffectType absorptionEffectType() {
+        return NotificationEffectType.FADE_IN_OUT;
     }
 
     @ConfigItem(
@@ -693,8 +693,8 @@ public interface UltimateNMZConfig extends Config {
             position = 5,
             section = absorptionSection
     )
-    default VisualNotificationSpeed absorptionEffectSpeed() {
-        return VisualNotificationSpeed.DEFAULT;
+    default NotificationSpeed absorptionEffectSpeed() {
+        return NotificationSpeed.DEFAULT;
     }
 
     /*
@@ -702,13 +702,104 @@ public interface UltimateNMZConfig extends Config {
      */
 
     @ConfigItem(
-            keyName = "removeNMZOverlay",
-            name = "Override NMZ overlay",
-            description = "Removes the Nightmare Zone Point overlay.",
+            keyName = "showCountdownOverlay",
+            name = "Show Countdown Overlay",
+            description = "Shows the Ultimate NMZ Countdown Overlay",
             position = 0,
             section = paintSection
     )
+    default boolean showCountdownOverlay() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "showNMZOverlay",
+            name = "Show Overlay",
+            description = "Shows the Ultimate NMZ Overlay",
+            position = 1,
+            section = paintSection
+    )
+    default boolean showNMZOverlay() {
+        return true;
+    }
+
+
+
+    @ConfigItem(
+            keyName = "removeNMZOverlay",
+            name = "Override NMZ overlay",
+            description = "Removes the Nightmare Zone Point overlay.",
+            position = 2,
+            section = paintSection
+    )
     default boolean removeNMZOverlay() {
+        return true;
+    }
+
+
+    @ConfigItem(
+            keyName = "showSessionTime",
+            name = "Show Session Time",
+            description = "Show the Session Time",
+            position = 3,
+            section = paintSection
+    )
+    default boolean showSessionTime() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "showHitpoints",
+            name = "Show Hitpoints",
+            description = "Show the Current Hitpoints",
+            position = 4,
+            section = paintSection
+    )
+    default boolean showHitpoints() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "showAbsorptionPoints",
+            name = "Show Absorption Points",
+            description = "Show the Current Absorption Points",
+            position = 5,
+            section = paintSection
+    )
+    default boolean showAbsorptionPoints() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "showOverloadTimer",
+            name = "Show Overload Timer",
+            description = "Show the amount of time before your Overload Potion runs out.",
+            position = 6,
+            section = paintSection
+    )
+    default boolean showOverloadTimer() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "formatOverlayPoints",
+            name = "Format Points",
+            description = "Format Points to a number like `4.3k`",
+            position = 7,
+            section = paintSection
+    )
+    default boolean formatOverlayPoints() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "showNightmarePoints",
+            name = "Show Points Earned",
+            description = "Shows the total points earned.",
+            position = 8,
+            section = paintSection
+    )
+    default boolean showNightmarePoints() {
         return true;
     }
 
@@ -716,7 +807,7 @@ public interface UltimateNMZConfig extends Config {
             keyName = "showPointsPerHour",
             name = "Show Points Per Hour",
             description = "Shows the Estimated Points Per Hour",
-            position = 1,
+            position = 9,
             section = paintSection
     )
     default boolean showPointsPerHour() {
@@ -727,7 +818,7 @@ public interface UltimateNMZConfig extends Config {
             keyName = "showTotalPoints",
             name = "Show Total Points Earned",
             description = "Shows the total points you have earned.",
-            position = 2,
+            position = 10,
             section = paintSection
     )
     default boolean showTotalPoints() {

@@ -1,21 +1,14 @@
 package com.github.iant89.ultimatenmz.utils;
 
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
 
 public class InventoryUtils {
 
     public static boolean hasItem(Client client, int itemId) {
-        ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
-
-        if (container != null) {
-            for (Item item : container.getItems()) {
-                if(item.getId() == itemId) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return hasOneOfItems(client, itemId);
     }
 
     public static boolean hasOneOfItems(Client client, int... ids) {
@@ -30,7 +23,6 @@ public class InventoryUtils {
                 }
             }
         }
-
 
         return false;
     }

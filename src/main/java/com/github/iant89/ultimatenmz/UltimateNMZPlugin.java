@@ -1,13 +1,8 @@
 package com.github.iant89.ultimatenmz;
 
 
-
-
 import com.github.iant89.ultimatenmz.notifications.*;
-import com.github.iant89.ultimatenmz.overlays.CountdownOverlay;
-import com.github.iant89.ultimatenmz.overlays.PowerUpOverlay;
-import com.github.iant89.ultimatenmz.overlays.UltimateNMZOverlay;
-import com.github.iant89.ultimatenmz.overlays.VisualNotificationOverlay;
+import com.github.iant89.ultimatenmz.overlays.*;
 import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import com.google.inject.Provides;
 import javax.inject.Inject;
@@ -15,12 +10,11 @@ import javax.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameObjectDespawned;
-import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameTick;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -32,9 +26,9 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
 
-import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @Slf4j
@@ -52,65 +46,54 @@ public class UltimateNMZPlugin extends Plugin {
 	private static final Duration OVERLOAD_DURATION = Duration.ofMinutes(5);
 
 	@Inject
+	@Getter
 	private Client client;
 
 	@Inject
+	@Getter
 	private Notifier notifier;
 
 	@Inject
 	private ClientThread clientThread;
 
 	@Inject
+	@Getter
 	private OverlayManager overlayManager;
 
 	@Inject
 	private UltimateNMZConfig config;
 
 	@Inject
+	@Getter
 	private SkillIconManager iconManager;
 
 	@Inject
 	private UltimateNMZOverlay ultimateNmzOverlay;
 
 	@Inject
-	private VisualNotificationManager notificationManager;
+	@Getter
+	private NotificationOverlay notificationOverlay;
 
 	@Inject
-	private VisualNotificationOverlay notificationOverlay;
-
-	@Inject
+	@Getter
 	private CountdownOverlay countdownOverlay;
 
 	@Inject
+	@Getter
 	private PowerUpOverlay powerUpOverlay;
+
+	@Inject
+	@Getter
+	private NotificationManager notificationManager;
+
+	@Inject
+	@Getter
+	private NativeNotification nativeNotificationManager;
 
 	@Getter
 	public int pointsPerHour;
 
 	private Instant nmzSessionStartTime;
-
-	// Has the NMZ Started?
-	private boolean nmzStarted = false;
-
-	private boolean absorptionNotificationSend = true;
-
-	// Overload Variables
-	private boolean overloadNotificationSend = true;
-
-
-	/*
-	 * Timers for Anti-Spamming of Native Notifications.
-	 */
-	private Instant lastHPAboveThresholdNotification;
-	private Instant lastHPBelowThresholdNotification;
-	private Instant lastAbsorptionBelowThresholdNotification;
-	private Instant lastOverloadWarningNotification;
-	private Instant lastOverloadExpiredNotification;
-	private Instant lastZapperNotification;
-	private Instant lastRecurrentDamageNotification;
-	private Instant lastUltimateForceNotification;
-	private Instant lastPowerSurgeNotification;
-
 
 	private Instant lastOverload;
 
@@ -119,6 +102,7 @@ public class UltimateNMZPlugin extends Plugin {
 	private Instant sessionStart;
 	private Duration sessionDuration;
 	private Instant sessionEnd;
+
 
 	@Override
 	protected void startUp() throws Exception {
@@ -132,12 +116,9 @@ public class UltimateNMZPlugin extends Plugin {
 		}
 	}
 
+
 	private void start() {
 
-	}
-
-	public VisualNotificationManager getNotificationManager() {
-		return notificationManager;
 	}
 
 	@Override
@@ -152,7 +133,6 @@ public class UltimateNMZPlugin extends Plugin {
 		if (nmzWidget != null) {
 			nmzWidget.setHidden(false);
 		}
-
 	}
 
 	@Subscribe
@@ -161,8 +141,17 @@ public class UltimateNMZPlugin extends Plugin {
 			return;
 		}
 
+		if(!config.visualAlerts()) {
+			getNotificationManager().clearNotifications();
+		}
+
 		getNotificationManager().configUpdated();
 		ultimateNmzOverlay.updateConfig();
+
+		Widget nmzWidget = client.getWidget(WidgetInfo.NIGHTMARE_ZONE);
+		if (nmzWidget != null) {
+			nmzWidget.setHidden(getConfig().removeNMZOverlay());
+		}
 	}
 
 	@Provides
@@ -211,23 +200,19 @@ public class UltimateNMZPlugin extends Plugin {
 		if(msg.contains("You drink some of your overload potion.")) {
 
 			// Drinking an Overload Potion
-			log.debug("Player drank a overload potion");
-
 			overloadTimer = System.currentTimeMillis() + ((5 * 60) * 1000);
 
-			final Instant now = Instant.now();
-			lastOverload = now;
-			overloadNotificationSend = true;
+			lastOverload = Instant.now();
 
-			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
-			getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+			getNotificationManager().remove(NotificationType.OVERLOAD_ALMOST_EXPIRED);
+			getNotificationManager().remove(NotificationType.OVERLOAD_EXPIRED);
 
 			if(config.maximumHPNotification()) {
 				int hpLeft = client.getBoostedSkillLevel(Skill.HITPOINTS) - 50;
 
 				if(hpLeft <= config.maximumHPThresholdValue()) {
-					getNotificationManager().removeNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-					getNotificationManager().blockNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, 15);
+					getNotificationManager().remove(NotificationType.HP_ABOVE_THRESHOLD);
+					getNotificationManager().disableNotificationType(NotificationType.HP_ABOVE_THRESHOLD, 8);
 				}
 			}
 			return;
@@ -241,24 +226,23 @@ public class UltimateNMZPlugin extends Plugin {
 
 		if (msg.contains("effects of overload have worn off")) {
 
-			getNotificationManager().blockNotification(VisualNotificationType.HP_ABOVE_THRESHOLD, 2);
-
 			overloadTimer = -1;
 			// Overload Potion worn off
 			if (config.overloadExpiredNotification()) {
 				if(InventoryUtils.hasOneOfItems(client, ItemID.OVERLOAD_4, ItemID.OVERLOAD_3, ItemID.OVERLOAD_2, ItemID.OVERLOAD_1)) {
-					notificationManager.removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+					getNotificationManager().disableNotificationType(NotificationType.HP_ABOVE_THRESHOLD, 3);
+					getNotificationManager().remove(NotificationType.OVERLOAD_ALMOST_EXPIRED);
+					getNotificationManager().create(NotificationType.OVERLOAD_EXPIRED);
 
-					if(config.visualAlerts()) {
-						getNotificationManager().createNotification(VisualNotificationType.OVERLOAD_EXPIRED);
-					}
 				} else {
-					getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
-					getNotificationManager().removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+					getNotificationManager().remove(NotificationType.OVERLOAD_ALMOST_EXPIRED);
+					getNotificationManager().remove(NotificationType.OVERLOAD_EXPIRED);
 				}
+			} else {
+				getNotificationManager().remove(NotificationType.OVERLOAD_ALMOST_EXPIRED);
 			}
 
-			sendNativeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+			getNativeNotificationManager().create(NotificationType.OVERLOAD_EXPIRED);
 
 			lastOverload = null;
 
@@ -272,70 +256,39 @@ public class UltimateNMZPlugin extends Plugin {
 			// Started NMZ...
 			startSession();
 
-		} else if(msg.contains("You activate the")) {
-
-			// Activated Zapper
-			if(msg.contains("zapper")) {
-				getNotificationManager().removeNotification(VisualNotificationType.ZAPPER_SPAWNED);
-			}
-
-		} else if(msg.contains("You now have")) {
-
-			// Activated Recurrent Damage
-			if(msg.contains("recurrent damage")) {
-				getNotificationManager().removeNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED);
-			}
-
-		} else if(msg.contains("You feel a surge of special")) {
-
-			// Activated Power-Surge
-			getNotificationManager().removeNotification(VisualNotificationType.POWER_SURGE_SPAWNED);
-
 		} else if (msg.contains("A power-up has spawned:")) {
 
 			if (msg.contains("Power surge")) {
 
 				// Power-Surge Spawned
-				if (config.powerSurgeNotification()) {
-					if(config.visualAlerts()) {
-						getNotificationManager().createNotification(VisualNotificationType.POWER_SURGE_SPAWNED);
-					}
+				if(config.powerSurgeNotification()) {
+					getNotificationManager().create(NotificationType.POWER_SURGE_SPAWNED);
+					getNativeNotificationManager().create(NotificationType.POWER_SURGE_SPAWNED);
 				}
-
-				sendNativeNotification(VisualNotificationType.POWER_SURGE_SPAWNED);
 
 			} else if (msg.contains("Recurrent damage")) {
 
 				// Recurrent Damage Spawned
-				if (config.recurrentDamageNotification()) {
-					if(config.visualAlerts()) {
-						getNotificationManager().createNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED);
-					}
+				if(config.recurrentDamageNotification()) {
+					getNotificationManager().create(NotificationType.RECURRENT_DAMAGE_SPAWNED);
+					getNativeNotificationManager().create(NotificationType.RECURRENT_DAMAGE_SPAWNED);
 				}
-
-				sendNativeNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED);
 
 			} else if (msg.contains("Zapper")) {
 
 				// Zapper Spawned
-				if (config.zapperNotification()) {
-					if(config.visualAlerts()) {
-						getNotificationManager().createNotification(VisualNotificationType.ZAPPER_SPAWNED);
-					}
+				if(config.zapperNotification()) {
+					getNotificationManager().create(NotificationType.ZAPPER_SPAWNED);
+					getNativeNotificationManager().create(NotificationType.ZAPPER_SPAWNED);
 				}
-
-				sendNativeNotification(VisualNotificationType.ZAPPER_SPAWNED);
 
 			} else if (msg.contains("Ultimate force")) {
 
 				// Ultimate Force Spawned
-				if (config.ultimateForceNotification()) {
-					if(config.visualAlerts()) {
-						getNotificationManager().createNotification(VisualNotificationType.ULTIMATE_FORCE_SPAWNED);
-					}
+				if(config.ultimateForceNotification()) {
+					getNotificationManager().create(NotificationType.ULTIMATE_FORCE_SPAWNED);
+					getNativeNotificationManager().create(NotificationType.ULTIMATE_FORCE_SPAWNED);
 				}
-
-				sendNativeNotification(VisualNotificationType.ULTIMATE_FORCE_SPAWNED);
 			}
 		}
 	}
@@ -349,19 +302,19 @@ public class UltimateNMZPlugin extends Plugin {
 	public void onGameObjectDespawned(GameObjectDespawned event) {
 		switch (event.getGameObject().getId()) {
 			case Constants.OBJECT_POWER_SURGE:
-				getNotificationManager().removeNotification(VisualNotificationType.POWER_SURGE_SPAWNED);
+				getNotificationManager().remove(NotificationType.POWER_SURGE_SPAWNED);
 				break;
 
 			case Constants.OBJECT_RECURRENT_DAMAGE:
-				getNotificationManager().removeNotification(VisualNotificationType.RECURRENT_DAMAGE_SPAWNED);
+				getNotificationManager().remove(NotificationType.RECURRENT_DAMAGE_SPAWNED);
 				break;
 
 			case Constants.OBJECT_ZAPPER:
-				getNotificationManager().removeNotification(VisualNotificationType.ZAPPER_SPAWNED);
+				getNotificationManager().remove(NotificationType.ZAPPER_SPAWNED);
 				break;
 
 			case Constants.OBJECT_ULTIMATE_FORCE:
-				getNotificationManager().removeNotification(VisualNotificationType.ULTIMATE_FORCE_SPAWNED);
+				getNotificationManager().remove(NotificationType.ULTIMATE_FORCE_SPAWNED);
 				break;
 		}
 	}
@@ -370,20 +323,69 @@ public class UltimateNMZPlugin extends Plugin {
 		return client.getVar(Varbits.NMZ_ABSORPTION);
 	}
 
+	private void checkHitpoints() {
+
+		final int currentHP = client.getBoostedSkillLevel(Skill.HITPOINTS);
+
+		boolean aboveHPThreshold = false;
+		boolean belowHPThreshold = false;
+
+		if(config.minimumHPNotification() && config.maximumHPNotification()) {
+			if(currentHP < config.minimumHPThresholdValue() && config.minimumHPThresholdValue() != -1) {
+				belowHPThreshold = true;
+			} else if(currentHP > config.maximumHPThresholdValue() && config.maximumHPThresholdValue() != -1) {
+				aboveHPThreshold = true;
+			}
+		} else if(config.minimumHPNotification()) {
+			if(currentHP < config.minimumHPThresholdValue() && config.minimumHPThresholdValue() != -1) {
+				belowHPThreshold = true;
+			}
+		} else if(config.maximumHPNotification()) {
+			if(currentHP > config.maximumHPThresholdValue() && config.maximumHPThresholdValue() != -1) {
+				aboveHPThreshold = true;
+			}
+		}
+
+		if(config.minimumHPNotification() && config.maximumHPNotification()) {
+			if (belowHPThreshold) {
+				getNotificationManager().create(NotificationType.HP_BELOW_THRESHOLD);
+			} else {
+				getNotificationManager().remove(NotificationType.HP_BELOW_THRESHOLD);
+			}
+			if(aboveHPThreshold) {
+				getNotificationManager().create(NotificationType.HP_ABOVE_THRESHOLD);
+			} else {
+				getNotificationManager().remove(NotificationType.HP_ABOVE_THRESHOLD);
+			}
+		} else if(config.minimumHPNotification()) {
+			if (belowHPThreshold) {
+				getNotificationManager().create(NotificationType.HP_BELOW_THRESHOLD);
+			} else {
+				getNotificationManager().remove(NotificationType.HP_BELOW_THRESHOLD);
+			}
+		} else if(config.maximumHPNotification()) {
+			if (aboveHPThreshold) {
+				getNotificationManager().create(NotificationType.HP_ABOVE_THRESHOLD);
+			} else {
+				getNotificationManager().remove(NotificationType.HP_ABOVE_THRESHOLD);
+			}
+		}
+	}
+
 	private void checkAbsorption() {
 		int absorptionPoints = client.getVar(Varbits.NMZ_ABSORPTION);
 
-		if(absorptionPoints < config.absorptionThreshold()) {
+		if(absorptionPoints <= config.absorptionThreshold()) {
 			if(config.absorptionNotification()) {
 				if(InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_1, ItemID.ABSORPTION_2, ItemID.ABSORPTION_3, ItemID.ABSORPTION_4)) {
-					notificationManager.createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-
-					sendNativeNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
+					getNotificationManager().create(NotificationType.ABSORPTION_BELOW_THRESHOLD);
+					getNativeNotificationManager().create(NotificationType.ABSORPTION_BELOW_THRESHOLD);
 				} else {
-					notificationManager.removeNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
+					getNotificationManager().remove(NotificationType.ABSORPTION_BELOW_THRESHOLD);
 				}
-
 			}
+		} else {
+			getNotificationManager().remove(NotificationType.ABSORPTION_BELOW_THRESHOLD);
 		}
 	}
 
@@ -397,25 +399,22 @@ public class UltimateNMZPlugin extends Plugin {
 
 			if(InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_1, ItemID.ABSORPTION_2, ItemID.ABSORPTION_3, ItemID.ABSORPTION_4)) {
 				if(config.overloadExpiredNotification()) {
-					notificationManager.removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
-					notificationManager.createNotification(VisualNotificationType.OVERLOAD_EXPIRED);
 
-					sendNativeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
+					getNotificationManager().remove(NotificationType.OVERLOAD_ALMOST_EXPIRED);
+					getNotificationManager().create(NotificationType.OVERLOAD_EXPIRED);
+					getNativeNotificationManager().create(NotificationType.OVERLOAD_EXPIRED);
+
 				}
 			} else {
-				notificationManager.removeNotification(VisualNotificationType.OVERLOAD_EXPIRED);
-				notificationManager.removeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
+				getNotificationManager().remove(NotificationType.OVERLOAD_EXPIRED);
+				getNotificationManager().remove(NotificationType.OVERLOAD_ALMOST_EXPIRED);
 			}
 			return;
 		} else if(System.currentTimeMillis() >= (overloadTimer - (config.overloadRunoutTime() * 1000))) {
 			if(config.overloadRunoutNotification()) {
-
 				// If we don't check before creating it will spam native notifications every 30 seconds.
-				if(!notificationManager.hasNotificationType(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED)) {
-					notificationManager.createNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
-
-					sendNativeNotification(VisualNotificationType.OVERLOAD_ALMOST_EXPIRED);
-				}
+				getNotificationManager().create(NotificationType.OVERLOAD_ALMOST_EXPIRED);
+				getNativeNotificationManager().create(NotificationType.OVERLOAD_ALMOST_EXPIRED);
 			}
 		}
 	}
@@ -454,13 +453,6 @@ public class UltimateNMZPlugin extends Plugin {
 	@Subscribe
 	private void onGameTick(GameTick event) {
 		if (!isInNightmareZone()) {
-			if (!absorptionNotificationSend) {
-				absorptionNotificationSend = true;
-			}
-			if(!overloadNotificationSend) {
-				overloadNotificationSend = true;
-			}
-
 			if (nmzSessionStartTime != null) {
 				resetPointsPerHour();
 			}
@@ -468,89 +460,21 @@ public class UltimateNMZPlugin extends Plugin {
 			return;
 		}
 
-		if (config.absorptionNotification()) {
-			checkAbsorption();
-		}
+		if(config.visualAlerts() || config.nativeAlerts()) {
+			if (config.absorptionNotification()) {
+				checkAbsorption();
+			}
 
-		if(config.overloadExpiredNotification() || config.overloadRunoutNotification()) {
-			checkOverload();
+			if (config.overloadExpiredNotification() || config.overloadRunoutNotification()) {
+				checkOverload();
+			}
+
+			if (config.minimumHPNotification() || config.maximumHPNotification()) {
+				checkHitpoints();
+			}
 		}
 
 		pointsPerHour = calculatePointsPerHour();
-
-		final int currentHP = client.getBoostedSkillLevel(Skill.HITPOINTS);
-
-		boolean aboveHPThreshold = false;
-		boolean belowHPThreshold = false;
-
-		if(config.minimumHPNotification() && config.maximumHPNotification()) {
-			if(currentHP < config.minimumHPThresholdValue() && config.minimumHPThresholdValue() != -1) {
-				belowHPThreshold = true;
-			} else if(currentHP > config.maximumHPThresholdValue() && config.maximumHPThresholdValue() != -1) {
-				aboveHPThreshold = true;
-			}
-		} else if(config.minimumHPNotification()) {
-			if(currentHP < config.minimumHPThresholdValue() && config.minimumHPThresholdValue() != -1) {
-				belowHPThreshold = true;
-			}
-		} else if(config.maximumHPNotification()) {
-			if(currentHP > config.maximumHPThresholdValue() && config.maximumHPThresholdValue() != -1) {
-				aboveHPThreshold = true;
-			}
-		}
-
-		if(config.visualAlerts()) {
-			// Absorption
-			if(config.absorptionNotification()){
-				if (getAbsorptionPoints() <= config.absorptionThreshold()) {
-					getNotificationManager().createNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-				} else {
-					getNotificationManager().removeNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-				}
-			} else {
-				getNotificationManager().removeNotification(VisualNotificationType.ABSORPTION_BELOW_THRESHOLD);
-			}
-
-			// Overload Expired
-			if(config.overloadExpiredNotification()) {
-
-			}
-
-			// Overload Expire Warning
-			if(config.overloadRunoutNotification()) {
-
-			}
-
-			// Hitpoints
-			if(config.minimumHPNotification() && config.maximumHPNotification()) {
-				if (belowHPThreshold) {
-					getNotificationManager().createNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-				} else {
-					getNotificationManager().removeNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-				}
-				if(aboveHPThreshold) {
-					getNotificationManager().createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-				} else {
-					getNotificationManager().removeNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-				}
-			} else if(config.minimumHPNotification()) {
-				if (belowHPThreshold) {
-					getNotificationManager().createNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-				} else {
-					getNotificationManager().removeNotification(VisualNotificationType.HP_BELOW_THRESHOLD);
-				}
-			} else if(config.maximumHPNotification()) {
-				if (aboveHPThreshold) {
-					getNotificationManager().createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-				} else {
-					getNotificationManager().removeNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
-				}
-			}
-
-
-		} else {
-			getNotificationManager().clearNotifications();
-		}
 	}
 
 	private void startSession() {
@@ -561,155 +485,46 @@ public class UltimateNMZPlugin extends Plugin {
 		countdownOverlay.triggerCountdown(Instant.now().plus(Duration.ofSeconds(25)));
 
 		if(config.nativeAlerts()) {
-			notifier.notify("Nightmare Zone has started!", TrayIcon.MessageType.INFO);
+			notifier.notify(Constants.NATIVE_NOTIFICATION_NMZ_STARTED_MESSAGE);
 		}
 
 		resetPointsPerHour();
+
+		// Restore nmz widget
+		Widget nmzWidget = client.getWidget(WidgetInfo.NIGHTMARE_ZONE);
+		if (nmzWidget != null) {
+			nmzWidget.setHidden(getConfig().removeNMZOverlay());
+		}
 	}
 	private void endSession() {
-
-		// Grab the Time, to calculate total session length
+		// Grab the Time, to calculate total session length.
 		sessionEnd = Instant.now();
 
 		ultimateNmzOverlay.nightmareZoneEnded();
 
-		// Clear Tracking Variables
 		lastOverload = null;
 
 		// Remove all notifications, if they havent already been removed.
 		getNotificationManager().removeAll();
 
 		if(config.nativeAlerts()) {
-			notifier.notify("You have left the Nightmare Zone.", TrayIcon.MessageType.INFO);
+			notifier.notify(Constants.NATIVE_NOTIFICATION_NMZ_ENDED_MESSAGE);
+		}
+
+		// Restore nmz widget
+		Widget nmzWidget = client.getWidget(WidgetInfo.NIGHTMARE_ZONE);
+		if (nmzWidget != null) {
+			nmzWidget.setHidden(false);
 		}
 	}
 
-	/**
-	 * Checks if the time between now and instant has been atleast the duration seconds.
-	 *
-	 * @param instant
-	 * @return
-	 */
-	private boolean checkDurationForNotification(Instant instant, Duration duration) {
-		if(instant == null) {
-			return true;
-		}
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event) {
 
-		if(Duration.between(Instant.now(), instant).getSeconds() > duration.getSeconds()) {
-			return true;
-		}
-
-		return false;
 	}
-	private void sendNativeNotification(VisualNotificationType type) {
-		if(!config.nativeAlerts()) {
-			return;
-		}
 
-		switch (type) {
-			case HP_BELOW_THRESHOLD:
-				if(!config.minimumHPNotification()) {
-					break;
-				}
-
-				if(checkDurationForNotification(lastHPBelowThresholdNotification, Duration.ofSeconds(30))) {
-					lastHPBelowThresholdNotification = Instant.now();
-					notifier.notify("Your Hitpoints are below " + config.minimumHPThresholdValue(), TrayIcon.MessageType.INFO);
-				}
-				break;
-
-			case HP_ABOVE_THRESHOLD:
-				if(!config.maximumHPNotification()) {
-					break;
-				}
-
-				if(checkDurationForNotification(lastHPAboveThresholdNotification, Duration.ofSeconds(30))) {
-					lastHPAboveThresholdNotification = Instant.now();
-					notifier.notify("Your Hitpoints are above " + config.maximumHPThresholdValue(), TrayIcon.MessageType.INFO);
-				}
-				break;
-			case ABSORPTION_BELOW_THRESHOLD:
-				if(!config.absorptionNotification()) {
-					break;
-				}
-
-				if(InventoryUtils.hasOneOfItems(client, ItemID.ABSORPTION_4, ItemID.ABSORPTION_3, ItemID.ABSORPTION_2, ItemID.ABSORPTION_1)) {
-					if (checkDurationForNotification(lastAbsorptionBelowThresholdNotification, Duration.ofSeconds(30))) {
-						lastAbsorptionBelowThresholdNotification = Instant.now();
-						notifier.notify("Absorption Points is below threshold: " + getAbsorptionPoints(), TrayIcon.MessageType.INFO);
-					}
-				}
-				break;
-
-			case OVERLOAD_ALMOST_EXPIRED:
-				if(!config.overloadRunoutNotification()) {
-					break;
-				}
-
-				if(InventoryUtils.hasOneOfItems(client, ItemID.OVERLOAD_4, ItemID.OVERLOAD_3, ItemID.OVERLOAD_2, ItemID.OVERLOAD_1)) {
-					if (checkDurationForNotification(lastOverloadWarningNotification, Duration.ofSeconds(30))) {
-						lastOverloadWarningNotification = Instant.now();
-						notifier.notify("Your Overload Potion is about to expire.", TrayIcon.MessageType.INFO);
-					}
-				}
-				break;
-
-			case OVERLOAD_EXPIRED:
-				if(!config.overloadExpiredNotification()) {
-					break;
-				}
-
-				if(InventoryUtils.hasOneOfItems(client, ItemID.OVERLOAD_4, ItemID.OVERLOAD_3, ItemID.OVERLOAD_2, ItemID.OVERLOAD_1)) {
-					if (checkDurationForNotification(lastOverloadExpiredNotification, Duration.ofSeconds(60))) {
-						lastOverloadExpiredNotification = Instant.now();
-						notifier.notify("Your Overload Potion has expired.", TrayIcon.MessageType.INFO);
-					}
-				}
-				break;
-
-			case ZAPPER_SPAWNED:
-				if(!config.zapperNotification()) {
-					break;
-				}
-
-				if (checkDurationForNotification(lastZapperNotification, Duration.ofSeconds(60))) {
-					lastZapperNotification = Instant.now();
-					notifier.notify("A Zapper Power-Up has Spawned!", TrayIcon.MessageType.INFO);
-				}
-				break;
-
-			case POWER_SURGE_SPAWNED:
-				if(!config.powerSurgeNotification()) {
-					break;
-				}
-
-				if (checkDurationForNotification(lastPowerSurgeNotification, Duration.ofSeconds(60))) {
-					lastPowerSurgeNotification = Instant.now();
-					notifier.notify("A Power Surge Power-Up has Spawned!", TrayIcon.MessageType.INFO);
-				}
-				break;
-
-			case RECURRENT_DAMAGE_SPAWNED:
-				if(!config.recurrentDamageNotification()) {
-					break;
-				}
-
-				if (checkDurationForNotification(lastRecurrentDamageNotification, Duration.ofSeconds(60))) {
-					lastRecurrentDamageNotification = Instant.now();
-					notifier.notify("A Recurrent Damage Power-Up has Spawned!", TrayIcon.MessageType.INFO);
-				}
-				break;
-
-			case ULTIMATE_FORCE_SPAWNED:
-				if(!config.ultimateForceNotification()) {
-					break;
-				}
-
-				if (checkDurationForNotification(lastUltimateForceNotification, Duration.ofSeconds(60))) {
-					lastUltimateForceNotification = Instant.now();
-					notifier.notify("A Ultimate Force Power-Up has Spawned!", TrayIcon.MessageType.INFO);
-				}
-				break;
-		}
+	public UltimateNMZConfig getConfig() {
+		return config;
 	}
+
 }

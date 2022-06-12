@@ -1,6 +1,6 @@
 package com.github.iant89.ultimatenmz.notifications;
 
-public enum VisualNotificationSpeed {
+public enum NotificationSpeed {
     SLOW("Slow", 75),
     MEDIUM("Medium", 50),
     DEFAULT("Default", 25),
@@ -12,7 +12,7 @@ public enum VisualNotificationSpeed {
     String name;
     int ms;
 
-    VisualNotificationSpeed(String name, int delay) {
+    NotificationSpeed(String name, int delay) {
         this.name = name;
         ms = delay;
     }

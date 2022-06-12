@@ -1,16 +1,19 @@
 package com.github.iant89.ultimatenmz.notifications;
 
-import com.github.iant89.ultimatenmz.UltimateNMZConfig;
+import com.github.iant89.ultimatenmz.UltimateNMZPlugin;
 import com.github.iant89.ultimatenmz.drivers.ConstantDriver;
 import com.github.iant89.ultimatenmz.drivers.SineDriver;
 import com.github.iant89.ultimatenmz.drivers.StepDriver;
 import com.github.iant89.ultimatenmz.drivers.ValueDriver;
 
+import javax.inject.Inject;
 import java.awt.*;
 
-public class VisualNotification {
+public class Notification {
 
-    private VisualNotificationType notificationType;
+    private UltimateNMZPlugin plugin;
+
+    private NotificationType notificationType;
 
     private ValueDriver opacityDriver;
     private ValueDriver animationDriver;
@@ -23,10 +26,8 @@ public class VisualNotification {
     private long nextFlashTime = -1;
     private long flashDelay = 500;
 
-    private UltimateNMZConfig config;
-
-    public VisualNotification(final UltimateNMZConfig config, final VisualNotificationType type, final long length) {
-        this.config = config;
+    public Notification(UltimateNMZPlugin plugin, final NotificationType type, final long length) {
+        this.plugin = plugin;
         this.notificationType = type;
         this.notificationLength = length;
 
@@ -84,7 +85,7 @@ public class VisualNotification {
         }
     }
 
-    public VisualNotificationType getType() {
+    public NotificationType getType() {
         return notificationType;
     }
 
@@ -146,7 +147,7 @@ public class VisualNotification {
     private void renderBorder(Graphics2D graphics, Rectangle bounds, Color color, float size) {
         graphics.setColor(color);
         graphics.setStroke(new BasicStroke(size));
-        graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        graphics.drawRect(bounds.x, bounds.y, bounds.width - 1, bounds.height - 1);
         graphics.setStroke(new BasicStroke(1f));
     }
 
@@ -221,31 +222,31 @@ public class VisualNotification {
 
         switch (getType()) {
             case HP_BELOW_THRESHOLD:
-                return config.minimumHPAlertColor();
+                return plugin.getConfig().minimumHPAlertColor();
 
             case HP_ABOVE_THRESHOLD:
-                return config.maximumHPAlertColor();
+                return plugin.getConfig().maximumHPAlertColor();
 
             case ABSORPTION_BELOW_THRESHOLD:
-                return config.absorptionAlertColor();
+                return plugin.getConfig().absorptionAlertColor();
 
             case OVERLOAD_ALMOST_EXPIRED:
-                return config.overloadRunOutColor();
+                return plugin.getConfig().overloadRunOutColor();
 
             case OVERLOAD_EXPIRED:
-                return config.overloadExpiredColor();
+                return plugin.getConfig().overloadExpiredColor();
 
             case ZAPPER_SPAWNED:
-                return config.zapperAlertColor();
+                return plugin.getConfig().zapperAlertColor();
 
             case POWER_SURGE_SPAWNED:
-                return config.powerSurgeAlertColor();
+                return plugin.getConfig().powerSurgeAlertColor();
 
             case RECURRENT_DAMAGE_SPAWNED:
-                return config.recurrentDamageAlertColor();
+                return plugin.getConfig().recurrentDamageAlertColor();
 
             case ULTIMATE_FORCE_SPAWNED:
-                return config.ultimateForceAlertColor();
+                return plugin.getConfig().ultimateForceAlertColor();
 
             default:
                 return null;
@@ -253,70 +254,70 @@ public class VisualNotification {
     }
 
 
-    public VisualNotificationEffectType getEffect() {
+    public NotificationEffectType getEffect() {
 
         switch (getType()) {
             case HP_BELOW_THRESHOLD:
-                return config.minimumHPEffectType();
+                return plugin.getConfig().minimumHPEffectType();
 
             case HP_ABOVE_THRESHOLD:
-                return config.maximumHPEffectType();
+                return plugin.getConfig().maximumHPEffectType();
 
             case ABSORPTION_BELOW_THRESHOLD:
-                return config.absorptionEffectType();
+                return plugin.getConfig().absorptionEffectType();
 
             case OVERLOAD_ALMOST_EXPIRED:
-                return config.overloadRunOutEffectType();
+                return plugin.getConfig().overloadRunOutEffectType();
 
             case OVERLOAD_EXPIRED:
-                return config.overloadExpiredEffectType();
+                return plugin.getConfig().overloadExpiredEffectType();
 
             case ZAPPER_SPAWNED:
-                return config.zapperEffectType();
+                return plugin.getConfig().zapperEffectType();
 
             case POWER_SURGE_SPAWNED:
-                return config.powerSurgeEffectType();
+                return plugin.getConfig().powerSurgeEffectType();
 
             case RECURRENT_DAMAGE_SPAWNED:
-                return config.recurrentDamageEffectType();
+                return plugin.getConfig().recurrentDamageEffectType();
 
             case ULTIMATE_FORCE_SPAWNED:
-                return config.ultimateForceEffectType();
+                return plugin.getConfig().ultimateForceEffectType();
 
             default:
                 return null;
         }
     }
 
-    public VisualNotificationSpeed getEffectSpeed() {
+    public NotificationSpeed getEffectSpeed() {
 
         switch (getType()) {
             case HP_BELOW_THRESHOLD:
-                return config.minimumHPEffectSpeed();
+                return plugin.getConfig().minimumHPEffectSpeed();
 
             case HP_ABOVE_THRESHOLD:
-                return config.maximumHPEffectSpeed();
+                return plugin.getConfig().maximumHPEffectSpeed();
 
             case ABSORPTION_BELOW_THRESHOLD:
-                return config.absorptionEffectSpeed();
+                return plugin.getConfig().absorptionEffectSpeed();
 
             case OVERLOAD_ALMOST_EXPIRED:
-                return config.overloadRunOutEffectSpeed();
+                return plugin.getConfig().overloadRunOutEffectSpeed();
 
             case OVERLOAD_EXPIRED:
-                return config.overloadExpiredEffectSpeed();
+                return plugin.getConfig().overloadExpiredEffectSpeed();
 
             case ZAPPER_SPAWNED:
-                return config.zapperEffectSpeed();
+                return plugin.getConfig().zapperEffectSpeed();
 
             case POWER_SURGE_SPAWNED:
-                return config.powerSurgeEffectSpeed();
+                return plugin.getConfig().powerSurgeEffectSpeed();
 
             case RECURRENT_DAMAGE_SPAWNED:
-                return config.recurrentDamageEffectSpeed();
+                return plugin.getConfig().recurrentDamageEffectSpeed();
 
             case ULTIMATE_FORCE_SPAWNED:
-                return config.ultimateForceEffectSpeed();
+                return plugin.getConfig().ultimateForceEffectSpeed();
 
             default:
                 return null;
