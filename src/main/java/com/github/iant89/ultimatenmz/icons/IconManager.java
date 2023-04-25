@@ -137,6 +137,34 @@ public class IconManager {
 
                 }
                 return null;
+            
+            case ATTACK_BELOW_THRESHOLD:
+                if(!config.showMinimumAttackIcon()) {
+                    return null;
+                }
+                
+                return skillIconManager.getSkillImage(Skill.ATTACK);
+
+            case STRENGTH_BELOW_THRESHOLD:
+                if(!config.showMinimumStrengthIcon()) {
+                    return null;
+                }
+
+                return skillIconManager.getSkillImage(Skill.STRENGTH);
+
+            case RANGED_BELOW_THRESHOLD:
+                if(!config.showMinimumRangedIcon()) {
+                    return null;
+                }
+
+                return skillIconManager.getSkillImage(Skill.RANGED);
+
+            case MAGIC_BELOW_THRESHOLD:
+                if(!config.showMinimumMagicIcon()) {
+                    return null;
+                }
+
+                return skillIconManager.getSkillImage(Skill.MAGIC);
 
             default:
                 return null;

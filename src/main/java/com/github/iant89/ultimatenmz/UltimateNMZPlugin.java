@@ -8,6 +8,8 @@ import com.github.iant89.ultimatenmz.overlays.CountdownOverlay;
 import com.github.iant89.ultimatenmz.overlays.PowerUpOverlay;
 import com.github.iant89.ultimatenmz.overlays.UltimateNMZOverlay;
 import com.github.iant89.ultimatenmz.overlays.VisualNotificationOverlay;
+import com.github.iant89.ultimatenmz.skills.SkillConstants;
+import com.github.iant89.ultimatenmz.skills.SkillTracker;
 import com.github.iant89.ultimatenmz.utils.InventoryUtils;
 import com.google.inject.Provides;
 import javax.inject.Inject;
@@ -15,10 +17,7 @@ import javax.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameObjectDespawned;
-import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameTick;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.Notifier;
@@ -36,6 +35,10 @@ import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @PluginDescriptor(
@@ -83,6 +86,9 @@ public class UltimateNMZPlugin extends Plugin {
 
 	@Inject
 	private PowerUpOverlay powerUpOverlay;
+
+	@Inject
+	private SkillTracker skillTracker;
 
 	@Getter
 	public int pointsPerHour;
@@ -452,6 +458,11 @@ public class UltimateNMZPlugin extends Plugin {
 	}
 
 	@Subscribe
+	public void onStatChanged(StatChanged event) {
+		skillTracker.onStatChanged(event);
+	}
+
+	@Subscribe
 	private void onGameTick(GameTick event) {
 		if (!isInNightmareZone()) {
 			if (!absorptionNotificationSend) {
@@ -544,6 +555,19 @@ public class UltimateNMZPlugin extends Plugin {
 					getNotificationManager().createNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
 				} else {
 					getNotificationManager().removeNotification(VisualNotificationType.HP_ABOVE_THRESHOLD);
+				}
+			}
+
+			// Skills
+			Set<Skill> skillsToNotify = skillTracker.getUnboostedSkills(getMinimumBoosts())
+					.stream()
+					.filter(skill -> InventoryUtils.hasOneOfItems(client, SkillConstants.skillPotions.get(skill)))
+					.collect(Collectors.toSet());
+			for (Skill skill : SkillConstants.trackedSkills) {
+				if (skillsToNotify.contains(skill)) {
+					getNotificationManager().createNotification(SkillConstants.skillNotificationType.get(skill));
+				} else {
+					getNotificationManager().removeNotification(SkillConstants.skillNotificationType.get(skill));
 				}
 			}
 
@@ -711,5 +735,27 @@ public class UltimateNMZPlugin extends Plugin {
 				}
 				break;
 		}
+	}
+
+	private Map<Skill, Integer> getMinimumBoosts() {
+		Map<Skill, Integer> minimumBoosts = new EnumMap<>(Skill.class);
+		
+		if (config.attackBoostNotification()) {
+			minimumBoosts.put(Skill.ATTACK, config.minimumAttackThresholdValue());
+		}
+
+		if (config.strengthBoostNotification()) {
+			minimumBoosts.put(Skill.STRENGTH, config.minimumStrengthThresholdValue());
+		}
+
+		if (config.rangedBoostNotification()) {
+			minimumBoosts.put(Skill.RANGED, config.minimumRangedThresholdValue());
+		}
+
+		if (config.magicBoostNotification()) {
+			minimumBoosts.put(Skill.MAGIC, config.minimumMagicThresholdValue());
+		}
+
+		return minimumBoosts;
 	}
 }

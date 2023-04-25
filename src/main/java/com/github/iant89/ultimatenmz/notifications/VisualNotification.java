@@ -247,6 +247,18 @@ public class VisualNotification {
             case ULTIMATE_FORCE_SPAWNED:
                 return config.ultimateForceAlertColor();
 
+            case ATTACK_BELOW_THRESHOLD:
+                return config.minimumAttackAlertColor();
+
+            case STRENGTH_BELOW_THRESHOLD:
+                return config.minimumStrengthAlertColor();
+
+            case RANGED_BELOW_THRESHOLD:
+                return config.minimumRangedAlertColor();
+
+            case MAGIC_BELOW_THRESHOLD:
+                return config.minimumMagicAlertColor();
+
             default:
                 return null;
         }
@@ -283,6 +295,18 @@ public class VisualNotification {
             case ULTIMATE_FORCE_SPAWNED:
                 return config.ultimateForceEffectType();
 
+            case ATTACK_BELOW_THRESHOLD:
+                return config.minimumAttackEffectType();
+
+            case STRENGTH_BELOW_THRESHOLD:
+                return config.minimumStrengthEffectType();
+
+            case RANGED_BELOW_THRESHOLD:
+                return config.minimumRangedEffectType();
+
+            case MAGIC_BELOW_THRESHOLD:
+                return config.minimumMagicEffectType();
+
             default:
                 return null;
         }
@@ -317,6 +341,18 @@ public class VisualNotification {
 
             case ULTIMATE_FORCE_SPAWNED:
                 return config.ultimateForceEffectSpeed();
+
+            case ATTACK_BELOW_THRESHOLD:
+                return config.minimumAttackEffectSpeed();
+
+            case STRENGTH_BELOW_THRESHOLD:
+                return config.minimumStrengthEffectSpeed();
+
+            case RANGED_BELOW_THRESHOLD:
+                return config.minimumRangedEffectSpeed();
+
+            case MAGIC_BELOW_THRESHOLD:
+                return config.minimumMagicEffectSpeed();
 
             default:
                 return null;
