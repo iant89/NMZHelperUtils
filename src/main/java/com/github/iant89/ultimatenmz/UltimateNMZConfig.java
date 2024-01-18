@@ -82,28 +82,42 @@ public interface UltimateNMZConfig extends Config {
     )
     String overloadSection = "overloads";
 
-    /*
     @ConfigSection(
-            name = "Super Magic Potions",
-            description = "Options pertaining to Super Magic Potions.",
+            name = "Attack Boost",
+            description = "Options pertaining to Attack-boosting Potions.",
             position = 59,
             closedByDefault = false
     )
-    String superMagicPotionSection = "supermagic";
+    String attackSection = "attack";
 
     @ConfigSection(
-            name = "Super Ranging Potions",
-            description = "Options pertaining to Super Ranging Potions.",
+            name = "Strength Boost",
+            description = "Options pertaining to Strength-boosting Potions.",
             position = 60,
             closedByDefault = false
     )
-    String superRangingPotionSection = "superranging";
-     */
+    String strengthSection = "strength";
+
+    @ConfigSection(
+            name = "Ranged Boost",
+            description = "Options pertaining to Ranged-boosting Potions.",
+            position = 61,
+            closedByDefault = false
+    )
+    String rangedSection = "ranged";
+
+    @ConfigSection(
+            name = "Magic Boost",
+            description = "Options pertaining to Magic-boosting Potions.",
+            position = 62,
+            closedByDefault = false
+    )
+    String magicSection = "magic";
 
     @ConfigSection(
             name = "Paint",
             description = "Options pertaining to the Paint.",
-            position = 59,
+            position = 63,
             closedByDefault = false
     )
     String paintSection = "paint";
@@ -694,6 +708,286 @@ public interface UltimateNMZConfig extends Config {
             section = absorptionSection
     )
     default VisualNotificationSpeed absorptionEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
+    /*
+     * ATTACK BOOST SECTION
+     */
+
+    @ConfigItem(
+            keyName = "attackBoostNotification",
+            name = "Show Notifications",
+            description = "Enables notifications when your Attack boost falls below a certain threshold",
+            position = 0,
+            section = attackSection
+    )
+    default boolean attackBoostNotification() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumAttackThresholdValue",
+            name = "Threshold",
+            description = "The Minimum Boost before triggering a alert.",
+            position = 1,
+            section = attackSection
+    )
+    default int minimumAttackThresholdValue() {
+        return 1;
+    }
+
+    @ConfigItem(
+            keyName = "showMinimumAttackIcon",
+            name = "Show Icon",
+            description = "Toggles if the Attack icon is drawn on the visual notification.",
+            position = 2,
+            section = attackSection
+    )
+    default boolean showMinimumAttackIcon() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumAttackAlertColor",
+            name = "Color",
+            description = "The color of the Attack BELOW Threshold Notification.",
+            position = 3,
+            section = attackSection
+    )
+    default Color minimumAttackAlertColor() {
+        return new Color(106, 238, 242);
+    }
+
+    @ConfigItem(
+            keyName = "minimumAttackEffectType",
+            name = "Effect",
+            description = "The type of effect for Attack BELOW Threshold Notification.",
+            position = 4,
+            section = attackSection
+    )
+    default VisualNotificationEffectType minimumAttackEffectType() {
+        return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "minimumAttackEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = attackSection
+    )
+    default VisualNotificationSpeed minimumAttackEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
+    /*
+     * STRENGTH BOOST SECTION
+     */
+
+    @ConfigItem(
+            keyName = "strengthBoostNotification",
+            name = "Show Notifications",
+            description = "Enables notifications when your Strength boost falls below a certain threshold",
+            position = 0,
+            section = strengthSection
+    )
+    default boolean strengthBoostNotification() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumStrengthThresholdValue",
+            name = "Threshold",
+            description = "The Minimum Boost before triggering a alert.",
+            position = 1,
+            section = strengthSection
+    )
+    default int minimumStrengthThresholdValue() {
+        return 1;
+    }
+
+    @ConfigItem(
+            keyName = "showMinimumStrengthIcon",
+            name = "Show Icon",
+            description = "Toggles if the Strength icon is drawn on the visual notification.",
+            position = 2,
+            section = strengthSection
+    )
+    default boolean showMinimumStrengthIcon() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumStrengthAlertColor",
+            name = "Color",
+            description = "The color of the Strength BELOW Threshold Notification.",
+            position = 3,
+            section = strengthSection
+    )
+    default Color minimumStrengthAlertColor() {
+        return new Color(224, 222, 56);
+    }
+
+    @ConfigItem(
+            keyName = "minimumStrengthEffectType",
+            name = "Effect",
+            description = "The type of effect for Strength BELOW Threshold Notification.",
+            position = 4,
+            section = strengthSection
+    )
+    default VisualNotificationEffectType minimumStrengthEffectType() {
+        return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "minimumStrengthEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = strengthSection
+    )
+    default VisualNotificationSpeed minimumStrengthEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
+    /*
+     * RANGED BOOST SECTION
+     */
+
+    @ConfigItem(
+            keyName = "rangedBoostNotification",
+            name = "Show Notifications",
+            description = "Enables notifications when your Ranged boost falls below a certain threshold",
+            position = 0,
+            section = rangedSection
+    )
+    default boolean rangedBoostNotification() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumRangedThresholdValue",
+            name = "Threshold",
+            description = "The Minimum Boost before triggering a alert.",
+            position = 1,
+            section = rangedSection
+    )
+    default int minimumRangedThresholdValue() {
+        return 1;
+    }
+
+    @ConfigItem(
+            keyName = "showMinimumRangedIcon",
+            name = "Show Icon",
+            description = "Toggles if the Ranged icon is drawn on the visual notification.",
+            position = 2,
+            section = rangedSection
+    )
+    default boolean showMinimumRangedIcon() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumRangedAlertColor",
+            name = "Color",
+            description = "The color of the Ranged BELOW Threshold Notification.",
+            position = 3,
+            section = rangedSection
+    )
+    default Color minimumRangedAlertColor() {
+        return new Color(57, 184, 229);
+    }
+
+    @ConfigItem(
+            keyName = "minimumRangedEffectType",
+            name = "Effect",
+            description = "The type of effect for Ranged BELOW Threshold Notification.",
+            position = 4,
+            section = rangedSection
+    )
+    default VisualNotificationEffectType minimumRangedEffectType() {
+        return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "minimumRangedEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = rangedSection
+    )
+    default VisualNotificationSpeed minimumRangedEffectSpeed() {
+        return VisualNotificationSpeed.DEFAULT;
+    }
+
+    /*
+     * MAGIC BOOST SECTION
+     */
+
+    @ConfigItem(
+            keyName = "magicBoostNotification",
+            name = "Show Notifications",
+            description = "Enables notifications when your Magic boost falls below a certain threshold",
+            position = 0,
+            section = magicSection
+    )
+    default boolean magicBoostNotification() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumMagicThresholdValue",
+            name = "Threshold",
+            description = "The Minimum Boost before triggering a alert.",
+            position = 1,
+            section = magicSection
+    )
+    default int minimumMagicThresholdValue() {
+        return 1;
+    }
+
+    @ConfigItem(
+            keyName = "showMinimumMagicIcon",
+            name = "Show Icon",
+            description = "Toggles if the Magic icon is drawn on the visual notification.",
+            position = 2,
+            section = magicSection
+    )
+    default boolean showMinimumMagicIcon() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "minimumMagicAlertColor",
+            name = "Color",
+            description = "The color of the Magic BELOW Threshold Notification.",
+            position = 3,
+            section = magicSection
+    )
+    default Color minimumMagicAlertColor() {
+        return new Color(217 ,168, 150);
+    }
+
+    @ConfigItem(
+            keyName = "minimumMagicEffectType",
+            name = "Effect",
+            description = "The type of effect for Magic BELOW Threshold Notification.",
+            position = 4,
+            section = magicSection
+    )
+    default VisualNotificationEffectType minimumMagicEffectType() {
+        return VisualNotificationEffectType.FADE_IN_OUT;
+    }
+
+    @ConfigItem(
+            keyName = "minimumMagicEffectSpeed",
+            name = "Speed",
+            description = "The speed of the notification effect, This does nothing if effect type is `SOLID`.",
+            position = 5,
+            section = magicSection
+    )
+    default VisualNotificationSpeed minimumMagicEffectSpeed() {
         return VisualNotificationSpeed.DEFAULT;
     }
 

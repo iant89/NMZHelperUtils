@@ -102,6 +102,46 @@ It may seem like a lot, however it is separated to keep it from confusing you.
 | Expired Effect       | The Rendering Effect for the Expired notification                          |
 | Expired Speed        | The speed of the Expired Notification Effect                               |
 
+### Attack Boost
+| Option            | Description                                                          |
+|-------------------|----------------------------------------------------------------------|
+| Show Notification | Enable/Disable Notification when Attack boost is below the threshold |
+| Threshold         | The desired Minimum Attack boost before notifying                    |
+| Show Icon         | Shows Attack Icon on Notification                                    |
+| Color             | The Color of the notification                                        |
+| Effect            | The Rendering Effect for the notification                            |
+| Speed             | The speed of the Notification Effect                                 |
+
+### Strength Boost
+| Option            | Description                                                            |
+|-------------------|------------------------------------------------------------------------|
+| Show Notification | Enable/Disable Notification when Strength boost is below the threshold |
+| Threshold         | The desired Minimum Strength boost before notifying                    |
+| Show Icon         | Shows Strength Icon on Notification                                    |
+| Color             | The Color of the notification                                          |
+| Effect            | The Rendering Effect for the notification                              |
+| Speed             | The speed of the Notification Effect                                   |
+
+### Ranged Boost
+| Option            | Description                                                          |
+|-------------------|----------------------------------------------------------------------|
+| Show Notification | Enable/Disable Notification when Ranged boost is below the threshold |
+| Threshold         | The desired Minimum Ranged boost before notifying                    |
+| Show Icon         | Shows Ranged Icon on Notification                                    |
+| Color             | The Color of the notification                                        |
+| Effect            | The Rendering Effect for the notification                            |
+| Speed             | The speed of the Notification Effect                                 |
+
+### Magic Boost
+| Option            | Description                                                         |
+|-------------------|---------------------------------------------------------------------|
+| Show Notification | Enable/Disable Notification when Magic boost is below the threshold |
+| Threshold         | The desired Minimum Magic boost before notifying                    |
+| Show Icon         | Shows Magic Icon on Notification                                    |
+| Color             | The Color of the notification                                       |
+| Effect            | The Rendering Effect for the notification                           |
+| Speed             | The speed of the Notification Effect                                |
+
 ### Paint
 | Option               | Description                                                 |
 |----------------------|-------------------------------------------------------------|

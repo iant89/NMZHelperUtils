@@ -109,6 +109,10 @@ public class VisualNotificationManager {
             case ULTIMATE_FORCE_SPAWNED:
             case POWER_SURGE_SPAWNED:
             case RECURRENT_DAMAGE_SPAWNED:
+            case ATTACK_BELOW_THRESHOLD:
+            case STRENGTH_BELOW_THRESHOLD:
+            case RANGED_BELOW_THRESHOLD:
+            case MAGIC_BELOW_THRESHOLD:
                 notificationLength = 10;
                 break;
 
